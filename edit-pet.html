@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Pet - Happy Pets</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="forms.css">
+  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="forms.css?v=3">
 </head>
 <body>
   <div class="app">
@@ -184,7 +184,7 @@
     </nav>
   </div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=3"></script>
   <script>
     // Collapsible sections
     function toggleSection(button) {
@@ -295,12 +295,12 @@
       document.querySelectorAll('.schedule-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.value === value);
       });
-      document.getElementById('day-picker').style.display = value === 'weekly' ? 'flex' : 'none';
+      document.getElementById('day-picker').style.display = value === 'weekly' ? 'grid' : 'none';
     }
 
     function toggleDayPicker() {
       const isWeekly = document.getElementById('schedule-value').value === 'weekly';
-      document.getElementById('day-picker').style.display = isWeekly ? 'flex' : 'none';
+      document.getElementById('day-picker').style.display = isWeekly ? 'grid' : 'none';
     }
 
     function submitTaskForm() {
