@@ -102,16 +102,11 @@
               <input type="text" id="task-form-details" placeholder="e.g., 1 cup of kibble">
 
               <label>Schedule</label>
-              <div class="schedule-options">
-                <label class="schedule-option">
-                  <input type="radio" name="schedule" value="daily" checked onchange="toggleDayPicker()">
-                  <span class="schedule-label">Daily</span>
-                </label>
-                <label class="schedule-option">
-                  <input type="radio" name="schedule" value="weekly" onchange="toggleDayPicker()">
-                  <span class="schedule-label">Certain days</span>
-                </label>
+              <div class="schedule-toggle">
+                <button type="button" class="schedule-btn active" data-value="daily" onclick="setSchedule('daily')">Daily</button>
+                <button type="button" class="schedule-btn" data-value="weekly" onclick="setSchedule('weekly')">Certain days</button>
               </div>
+              <input type="hidden" name="schedule" id="schedule-value" value="daily">
 
               <div id="day-picker" class="day-picker" style="display: none;">
                 <label class="day-option"><input type="checkbox" name="days" value="0"><span>Sun</span></label>
@@ -255,9 +250,8 @@
       document.querySelector('.task-form-add').textContent = 'Add Task';
 
       // Reset schedule to daily
-      document.querySelector('input[name="schedule"][value="daily"]').checked = true;
+      setSchedule('daily');
       document.querySelectorAll('input[name="days"]').forEach(cb => cb.checked = false);
-      document.getElementById('day-picker').style.display = 'none';
 
       document.getElementById('task-form-popup').style.display = 'block';
       document.getElementById('task-form-name').focus();
@@ -280,9 +274,7 @@
       document.querySelector('.task-form-add').textContent = 'Save Changes';
 
       // Set schedule
-      const isWeekly = task.schedule === 'weekly';
-      document.querySelector(`input[name="schedule"][value="${isWeekly ? 'weekly' : 'daily'}"]`).checked = true;
-      document.getElementById('day-picker').style.display = isWeekly ? 'flex' : 'none';
+      setSchedule(task.schedule === 'weekly' ? 'weekly' : 'daily');
 
       // Set days
       document.querySelectorAll('input[name="days"]').forEach(cb => {
@@ -298,8 +290,16 @@
       editingTaskId = null;
     }
 
+    function setSchedule(value) {
+      document.getElementById('schedule-value').value = value;
+      document.querySelectorAll('.schedule-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.value === value);
+      });
+      document.getElementById('day-picker').style.display = value === 'weekly' ? 'flex' : 'none';
+    }
+
     function toggleDayPicker() {
-      const isWeekly = document.querySelector('input[name="schedule"]:checked').value === 'weekly';
+      const isWeekly = document.getElementById('schedule-value').value === 'weekly';
       document.getElementById('day-picker').style.display = isWeekly ? 'flex' : 'none';
     }
 
@@ -311,7 +311,7 @@
       const details = detailsInput.value.trim() || 'Tap when done!';
 
       // Get schedule
-      const schedule = document.querySelector('input[name="schedule"]:checked').value;
+      const schedule = document.getElementById('schedule-value').value;
       const dayCheckboxes = document.querySelectorAll('input[name="days"]:checked');
       const days = Array.from(dayCheckboxes).map(cb => parseInt(cb.value));
 

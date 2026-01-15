@@ -673,36 +673,31 @@
   margin-top: 2px;
 }
 
-/* Schedule Options */
-.schedule-options {
+/* Schedule Toggle */
+.schedule-toggle {
   display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 30px;
+  background: var(--background);
+  border-radius: 10px;
+  padding: 4px;
   margin-bottom: 12px;
 }
 
-.schedule-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.schedule-option input {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--primary);
-  margin: 0;
-  flex-shrink: 0;
-}
-
-.schedule-label {
-  font-size: 15px;
+.schedule-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 600;
-  display: inline;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.schedule-btn.active {
+  background: var(--primary);
+  color: white;
 }
 
 /* Day Picker */
