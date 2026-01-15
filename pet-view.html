@@ -36,9 +36,9 @@
         <div class="quick-action-icon">📸</div>
         <div class="quick-action-label">Add Memory</div>
       </a>
-      <a href="#" class="quick-action">
+      <a href="#" class="quick-action" id="edit-link">
         <div class="quick-action-icon">📝</div>
-        <div class="quick-action-label">Edit Tasks</div>
+        <div class="quick-action-label">Edit Pet</div>
       </a>
       <a href="#" class="quick-action" onclick="handleDeletePet(getUrlParam('id')); return false;">
         <div class="quick-action-icon">🗑️</div>
@@ -68,5 +68,14 @@
   </div>
 
   <script src="app.js"></script>
+  <script>
+    // Set edit link URL after page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      const petId = getUrlParam('id');
+      if (petId) {
+        document.getElementById('edit-link').href = `edit-pet.html?id=${petId}`;
+      }
+    });
+  </script>
 </body>
 </html>

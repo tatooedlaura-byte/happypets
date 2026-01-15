@@ -114,6 +114,21 @@ function deletePet(petId) {
   deleteTasksForPet(petId);
 }
 
+function updatePet(petId, updates) {
+  const pets = getPets();
+  const index = pets.findIndex(p => p.id === petId);
+  if (index === -1) return null;
+
+  pets[index] = {
+    ...pets[index],
+    ...updates,
+    updatedAt: new Date().toISOString()
+  };
+
+  savePets(pets);
+  return pets[index];
+}
+
 // ============================================
 // TASK COMPLETION TRACKING
 // ============================================
@@ -322,8 +337,22 @@ function renderTasks(pet) {
   let html = '';
 
   pet.tasks.forEach(taskId => {
-    const task = TASK_CONFIG[taskId];
-    if (!task) return;
+    let task;
+
+    // Check if it's a preset task or custom task
+    if (taskId.startsWith('custom_')) {
+      // Find custom task in pet's customTasks array
+      const customTask = (pet.customTasks || []).find(ct => ct.id === taskId);
+      if (!customTask) return;
+      task = {
+        icon: customTask.icon,
+        name: customTask.name,
+        time: 'Tap when done!'
+      };
+    } else {
+      task = TASK_CONFIG[taskId];
+      if (!task) return;
+    }
 
     const isComplete = isTaskComplete(pet.id, taskId);
 
@@ -332,7 +361,7 @@ function renderTasks(pet) {
               onclick="handleTaskClick('${pet.id}', '${taskId}')">
         <div class="task-icon">${task.icon}</div>
         <div class="task-content">
-          <div class="task-name">${task.name}</div>
+          <div class="task-name">${escapeHtml(task.name)}</div>
           <div class="task-time">${isComplete ? 'Done! ✨' : task.time}</div>
         </div>
         <div class="task-check">${isComplete ? '✓' : ''}</div>

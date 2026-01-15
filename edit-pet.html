@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Pet - Happy Pets</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="forms.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="pet-header" id="edit-header" style="background: linear-gradient(135deg, #7C9FE8 0%, #B8D4F1 100%);">
+      <a href="index.html" class="back-button" id="back-button">←</a>
+      <div class="pet-avatar" id="pet-avatar">🐾</div>
+      <h1 class="pet-name">Edit Pet</h1>
+      <p class="pet-type" id="pet-type-display"></p>
+    </header>
+
+    <!-- Edit Pet Form -->
+    <form id="edit-pet-form" class="form-section">
+      <div class="form-group">
+        <label for="pet-name">Pet's Name</label>
+        <input type="text" id="pet-name" placeholder="What's their name?" required>
+      </div>
+
+      <div class="form-group">
+        <label for="pet-breed">Breed (optional)</label>
+        <input type="text" id="pet-breed" placeholder="e.g., Golden Retriever">
+      </div>
+
+      <div class="form-group">
+        <label>Care Tasks</label>
+        <p class="form-hint">Select preset tasks or add your own below</p>
+        <div class="task-checklist" id="task-checklist">
+          <!-- Tasks rendered by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Custom Task Input -->
+      <div class="form-group">
+        <label for="custom-task">Add Custom Task</label>
+        <div class="custom-task-input">
+          <input type="text" id="custom-task-icon" placeholder="🩺" maxlength="2" class="icon-input">
+          <input type="text" id="custom-task-name" placeholder="e.g., Give medicine">
+          <button type="button" onclick="addCustomTask()" class="add-task-btn">+</button>
+        </div>
+        <p class="form-hint">Tip: Use an emoji for the icon!</p>
+      </div>
+
+      <!-- Custom Tasks List -->
+      <div id="custom-tasks-list" class="custom-tasks-list">
+        <!-- Custom tasks will appear here -->
+      </div>
+
+      <button type="submit" class="submit-button">
+        <span>Save Changes</span>
+        <span class="button-icon">✓</span>
+      </button>
+
+      <button type="button" class="delete-button" onclick="confirmDelete()">
+        Remove This Pet
+      </button>
+    </form>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">Today</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">📸</span>
+        <span class="nav-label">Memories</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">👨‍👩‍👧</span>
+        <span class="nav-label">Family</span>
+      </a>
+    </nav>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let currentPetId = null;
+    let customTasks = [];
+
+    // Preset tasks
+    const PRESET_TASKS = [
+      { id: 'feed-morning', icon: '🥣', name: 'Morning Food' },
+      { id: 'feed-evening', icon: '🥣', name: 'Evening Food' },
+      { id: 'water', icon: '💧', name: 'Fresh Water' },
+      { id: 'walk', icon: '🚶', name: 'Walk' },
+      { id: 'play', icon: '🎾', name: 'Playtime' },
+      { id: 'brush', icon: '🪥', name: 'Brush Fur' },
+      { id: 'clean', icon: '🧹', name: 'Clean Cage/Litter' },
+      { id: 'check', icon: '👀', name: 'Health Check' }
+    ];
+
+    function init() {
+      currentPetId = getUrlParam('id');
+      if (!currentPetId) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const pet = getPet(currentPetId);
+      if (!pet) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Set back button to return to pet view
+      document.getElementById('back-button').href = `pet-view.html?id=${currentPetId}`;
+
+      // Update header
+      const config = PET_CONFIG[pet.type] || PET_CONFIG.dog;
+      document.getElementById('edit-header').style.background =
+        `linear-gradient(135deg, ${config.color} 0%, ${lightenColor(config.color)} 100%)`;
+      document.getElementById('pet-avatar').textContent = config.emoji;
+      document.getElementById('pet-type-display').textContent = config.name;
+
+      // Fill in form fields
+      document.getElementById('pet-name').value = pet.name;
+      document.getElementById('pet-breed').value = pet.breed || '';
+
+      // Load custom tasks from pet
+      customTasks = pet.customTasks || [];
+
+      // Render task checkboxes
+      renderTaskCheckboxes(pet.tasks || []);
+      renderCustomTasksList();
+    }
+
+    function renderTaskCheckboxes(selectedTasks) {
+      const container = document.getElementById('task-checklist');
+
+      let html = '';
+      PRESET_TASKS.forEach(task => {
+        const isChecked = selectedTasks.includes(task.id);
+        html += `
+          <label class="task-check-option">
+            <input type="checkbox" name="tasks" value="${task.id}" ${isChecked ? 'checked' : ''}>
+            <span class="task-check-card">${task.icon} ${task.name}</span>
+          </label>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function addCustomTask() {
+      const iconInput = document.getElementById('custom-task-icon');
+      const nameInput = document.getElementById('custom-task-name');
+
+      const icon = iconInput.value.trim() || '📌';
+      const name = nameInput.value.trim();
+
+      if (!name) {
+        alert('Please enter a task name');
+        return;
+      }
+
+      // Create unique ID for custom task
+      const id = 'custom_' + Date.now();
+
+      customTasks.push({ id, icon, name });
+      renderCustomTasksList();
+
+      // Clear inputs
+      iconInput.value = '';
+      nameInput.value = '';
+    }
+
+    function removeCustomTask(taskId) {
+      customTasks = customTasks.filter(t => t.id !== taskId);
+      renderCustomTasksList();
+    }
+
+    function renderCustomTasksList() {
+      const container = document.getElementById('custom-tasks-list');
+
+      if (customTasks.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let html = '<label class="custom-tasks-label">Your Custom Tasks:</label>';
+
+      customTasks.forEach(task => {
+        html += `
+          <div class="custom-task-item">
+            <span class="custom-task-icon">${task.icon}</span>
+            <span class="custom-task-name">${escapeHtml(task.name)}</span>
+            <button type="button" class="remove-task-btn" onclick="removeCustomTask('${task.id}')">×</button>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function confirmDelete() {
+      if (confirm('Are you sure you want to remove this pet? This cannot be undone.')) {
+        deletePet(currentPetId);
+        window.location.href = 'index.html';
+      }
+    }
+
+    // Handle form submission
+    document.getElementById('edit-pet-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('pet-name').value.trim();
+      const breed = document.getElementById('pet-breed').value.trim();
+
+      // Get selected preset tasks
+      const taskCheckboxes = document.querySelectorAll('input[name="tasks"]:checked');
+      const tasks = Array.from(taskCheckboxes).map(cb => cb.value);
+
+      // Add custom task IDs
+      customTasks.forEach(ct => {
+        tasks.push(ct.id);
+      });
+
+      // Update pet
+      updatePet(currentPetId, { name, breed, tasks, customTasks });
+
+      // Redirect back to pet view
+      window.location.href = `pet-view.html?id=${currentPetId}`;
+    });
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
