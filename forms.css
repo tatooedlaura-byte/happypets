@@ -676,15 +676,19 @@
 /* Schedule Options */
 .schedule-options {
   display: flex;
-  gap: 20px;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 30px;
   margin-bottom: 12px;
 }
 
 .schedule-option {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .schedule-option input {
@@ -692,11 +696,13 @@
   height: 20px;
   accent-color: var(--primary);
   margin: 0;
+  flex-shrink: 0;
 }
 
 .schedule-label {
   font-size: 15px;
   font-weight: 600;
+  display: inline;
 }
 
 /* Day Picker */
