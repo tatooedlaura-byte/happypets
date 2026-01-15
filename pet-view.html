@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pet Care - Happy Pets</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Pet Header -->
+    <header class="pet-header">
+      <a href="index.html" class="back-button">←</a>
+      <div class="pet-avatar" id="pet-avatar">🐾</div>
+      <h1 class="pet-name" id="pet-name">Loading...</h1>
+      <p class="pet-type" id="pet-type"></p>
+    </header>
+
+    <!-- Today's Tasks -->
+    <section class="tasks-section">
+      <h2>📋 Today's Care</h2>
+      <div class="task-list" id="task-list">
+        <!-- Tasks rendered by JavaScript -->
+      </div>
+    </section>
+
+    <!-- Fun Fact -->
+    <div class="fun-fact">
+      <div class="fun-fact-icon">💡</div>
+      <p id="fun-fact-text">Loading a fun fact...</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <a href="#" class="quick-action">
+        <div class="quick-action-icon">📸</div>
+        <div class="quick-action-label">Add Memory</div>
+      </a>
+      <a href="#" class="quick-action">
+        <div class="quick-action-icon">📝</div>
+        <div class="quick-action-label">Edit Tasks</div>
+      </a>
+      <a href="#" class="quick-action" onclick="handleDeletePet(getUrlParam('id')); return false;">
+        <div class="quick-action-icon">🗑️</div>
+        <div class="quick-action-label">Remove Pet</div>
+      </a>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">Today</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">📸</span>
+        <span class="nav-label">Memories</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">👨‍👩‍👧</span>
+        <span class="nav-label">Family</span>
+      </a>
+    </nav>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

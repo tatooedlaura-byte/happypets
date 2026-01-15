@@ -1,0 +1,159 @@
+/* Forms Styles for Happy Pets */
+
+.form-section {
+  padding: 20px;
+  padding-bottom: 100px;
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group select {
+  width: 100%;
+  padding: 15px 18px;
+  font-size: 16px;
+  border: 2px solid var(--primary-light);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(124, 159, 232, 0.2);
+}
+
+.form-group input::placeholder {
+  color: var(--text-light);
+}
+
+/* Pet Type Grid */
+.pet-type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.pet-type-option input {
+  display: none;
+}
+
+.pet-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px 10px;
+  background: var(--card);
+  border: 2px solid var(--primary-light);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pet-type-option input:checked + .pet-type-card {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.pet-type-icon {
+  font-size: 30px;
+  margin-bottom: 5px;
+}
+
+.pet-type-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Task Checklist */
+.task-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.task-check-option input {
+  display: none;
+}
+
+.task-check-card {
+  display: inline-block;
+  padding: 10px 15px;
+  background: var(--card);
+  border: 2px solid var(--primary-light);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.task-check-option input:checked + .task-check-card {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+/* Submit Button */
+.submit-button {
+  width: 100%;
+  padding: 18px 30px;
+  background: linear-gradient(135deg, var(--accent) 0%, #7BC9A0 100%);
+  border: none;
+  border-radius: 16px;
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(149, 213, 178, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(149, 213, 178, 0.5);
+}
+
+.submit-button:active {
+  transform: translateY(0);
+}
+
+.button-icon {
+  font-size: 22px;
+}
+
+/* Delete Button */
+.delete-button {
+  width: 100%;
+  padding: 15px 30px;
+  background: transparent;
+  border: 2px solid #F8B4C4;
+  border-radius: 12px;
+  color: #E88A9E;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: all 0.2s;
+}
+
+.delete-button:hover {
+  background: #FFF0F3;
+}
