@@ -360,3 +360,62 @@
   outline: none;
   border-color: var(--primary);
 }
+
+/* Task Order List */
+.task-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-order-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  background: var(--card);
+  border: 2px solid var(--primary-light);
+  border-radius: 12px;
+}
+
+.task-order-icon {
+  font-size: 22px;
+}
+
+.task-order-name {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.task-order-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.order-btn {
+  width: 32px;
+  height: 24px;
+  background: var(--primary-light);
+  border: none;
+  border-radius: 6px;
+  color: var(--primary);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.order-btn:hover:not(:disabled) {
+  background: var(--primary);
+  color: white;
+}
+
+.order-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}

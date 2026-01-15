@@ -66,6 +66,15 @@
         <!-- Custom tasks will appear here -->
       </div>
 
+      <!-- Task Order -->
+      <div class="form-group" id="task-order-section" style="display: none;">
+        <label>Task Order</label>
+        <p class="form-hint">Drag or use arrows to reorder</p>
+        <div id="task-order-list" class="task-order-list">
+          <!-- Ordered tasks rendered by JavaScript -->
+        </div>
+      </div>
+
       <button type="submit" class="submit-button">
         <span>Save Changes</span>
         <span class="button-icon">✓</span>
@@ -101,6 +110,7 @@
   <script>
     let currentPetId = null;
     let customTasks = [];
+    let taskOrder = [];
 
     // Preset tasks
     const PRESET_TASKS = [
@@ -144,9 +154,13 @@
       // Load custom tasks from pet
       customTasks = pet.customTasks || [];
 
+      // Load task order (or use pet.tasks if no explicit order)
+      taskOrder = pet.tasks || [];
+
       // Render task checkboxes
       renderTaskCheckboxes(pet.tasks || []);
       renderCustomTasksList();
+      renderTaskOrderList();
 
       // Setup emoji picker
       setupEmojiPicker();
@@ -205,12 +219,19 @@
       if (isChecked) {
         wrapper.classList.add('expanded');
         hintDiv.classList.add('visible');
+        // Add to task order if not already there
+        if (!taskOrder.includes(taskId)) {
+          taskOrder.push(taskId);
+        }
       } else {
         wrapper.classList.remove('expanded');
         hintDiv.classList.remove('visible');
         // Clear hint when unchecked
         delete taskHints[taskId];
+        // Remove from task order
+        taskOrder = taskOrder.filter(t => t !== taskId);
       }
+      renderTaskOrderList();
     }
 
     function updateTaskHint(taskId, value) {
@@ -219,6 +240,68 @@
       } else {
         delete taskHints[taskId];
       }
+    }
+
+    function renderTaskOrderList() {
+      const container = document.getElementById('task-order-list');
+      const section = document.getElementById('task-order-section');
+
+      // Combine preset and custom tasks in taskOrder
+      const allTasks = taskOrder.filter(id => {
+        // Check if it's a selected preset task or a custom task
+        if (id.startsWith('custom_')) {
+          return customTasks.some(ct => ct.id === id);
+        } else {
+          return document.querySelector(`input[name="tasks"][value="${id}"]`)?.checked;
+        }
+      });
+
+      if (allTasks.length < 2) {
+        section.style.display = 'none';
+        return;
+      }
+
+      section.style.display = 'block';
+      let html = '';
+
+      allTasks.forEach((taskId, index) => {
+        let icon, name;
+
+        if (taskId.startsWith('custom_')) {
+          const ct = customTasks.find(c => c.id === taskId);
+          icon = ct ? ct.icon : '📌';
+          name = ct ? ct.name : 'Custom Task';
+        } else {
+          const preset = PRESET_TASKS.find(p => p.id === taskId);
+          icon = preset ? preset.icon : '📋';
+          name = preset ? preset.name : taskId;
+        }
+
+        html += `
+          <div class="task-order-item" data-task-id="${taskId}">
+            <span class="task-order-icon">${icon}</span>
+            <span class="task-order-name">${escapeHtml(name)}</span>
+            <div class="task-order-buttons">
+              <button type="button" class="order-btn" onclick="moveTask('${taskId}', -1)" ${index === 0 ? 'disabled' : ''}>▲</button>
+              <button type="button" class="order-btn" onclick="moveTask('${taskId}', 1)" ${index === allTasks.length - 1 ? 'disabled' : ''}>▼</button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function moveTask(taskId, direction) {
+      const index = taskOrder.indexOf(taskId);
+      if (index === -1) return;
+
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= taskOrder.length) return;
+
+      // Swap
+      [taskOrder[index], taskOrder[newIndex]] = [taskOrder[newIndex], taskOrder[index]];
+      renderTaskOrderList();
     }
 
     let selectedEmoji = '📌';
@@ -250,7 +333,12 @@
       const id = 'custom_' + Date.now();
 
       customTasks.push({ id, icon: selectedEmoji, name });
+
+      // Add to task order
+      taskOrder.push(id);
+
       renderCustomTasksList();
+      renderTaskOrderList();
 
       // Clear input and reset emoji
       nameInput.value = '';
@@ -258,7 +346,12 @@
 
     function removeCustomTask(taskId) {
       customTasks = customTasks.filter(t => t.id !== taskId);
+
+      // Remove from task order
+      taskOrder = taskOrder.filter(t => t !== taskId);
+
       renderCustomTasksList();
+      renderTaskOrderList();
     }
 
     function renderCustomTasksList() {
@@ -298,13 +391,14 @@
       const name = document.getElementById('pet-name').value.trim();
       const breed = document.getElementById('pet-breed').value.trim();
 
-      // Get selected preset tasks
-      const taskCheckboxes = document.querySelectorAll('input[name="tasks"]:checked');
-      const tasks = Array.from(taskCheckboxes).map(cb => cb.value);
-
-      // Add custom task IDs
-      customTasks.forEach(ct => {
-        tasks.push(ct.id);
+      // Use taskOrder which preserves the user's custom order
+      // Filter to only include currently selected/active tasks
+      const tasks = taskOrder.filter(taskId => {
+        if (taskId.startsWith('custom_')) {
+          return customTasks.some(ct => ct.id === taskId);
+        } else {
+          return document.querySelector(`input[name="tasks"][value="${taskId}"]`)?.checked;
+        }
       });
 
       // Update pet with tasks and custom hints
