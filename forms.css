@@ -676,37 +676,42 @@
 /* Schedule Options */
 .schedule-options {
   display: flex;
-  gap: 15px;
-  margin-bottom: 10px;
+  gap: 20px;
+  margin-bottom: 12px;
 }
 
 .schedule-option {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   cursor: pointer;
 }
 
 .schedule-option input {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   accent-color: var(--primary);
+  margin: 0;
 }
 
 .schedule-label {
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 /* Day Picker */
 .day-picker {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 10px;
+  background: var(--background);
+  border-radius: 10px;
 }
 
 .day-option {
+  flex: 1;
   cursor: pointer;
 }
 
@@ -716,13 +721,14 @@
 
 .day-option span {
   display: block;
-  padding: 8px 12px;
-  background: var(--background);
+  padding: 10px 4px;
+  background: var(--card);
   border: 2px solid var(--primary-light);
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text);
+  text-align: center;
   transition: all 0.2s;
 }
 
