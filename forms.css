@@ -325,3 +325,38 @@
   background: var(--card);
   color: var(--text);
 }
+
+/* Task Check Wrapper with expandable hint */
+.task-check-wrapper {
+  margin-bottom: 10px;
+}
+
+.task-hint-input {
+  display: none;
+  margin-top: 8px;
+  margin-left: 10px;
+}
+
+.task-hint-input.visible {
+  display: block;
+}
+
+.task-hint-input input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  background: #F0FFF4;
+  color: var(--text);
+}
+
+.task-hint-input input::placeholder {
+  color: var(--text-light);
+  font-style: italic;
+}
+
+.task-hint-input input:focus {
+  outline: none;
+  border-color: var(--primary);
+}

@@ -152,21 +152,73 @@
       setupEmojiPicker();
     }
 
+    let taskHints = {};
+
     function renderTaskCheckboxes(selectedTasks) {
       const container = document.getElementById('task-checklist');
+      const pet = getPet(currentPetId);
+      taskHints = pet.taskHints || {};
 
       let html = '';
       PRESET_TASKS.forEach(task => {
         const isChecked = selectedTasks.includes(task.id);
+        const customHint = taskHints[task.id] || '';
+        const defaultHint = getDefaultHint(task.id);
+
         html += `
-          <label class="task-check-option">
-            <input type="checkbox" name="tasks" value="${task.id}" ${isChecked ? 'checked' : ''}>
-            <span class="task-check-card">${task.icon} ${task.name}</span>
-          </label>
+          <div class="task-check-wrapper ${isChecked ? 'expanded' : ''}">
+            <label class="task-check-option">
+              <input type="checkbox" name="tasks" value="${task.id}" ${isChecked ? 'checked' : ''} onchange="toggleTaskHint('${task.id}', this.checked)">
+              <span class="task-check-card">${task.icon} ${task.name}</span>
+            </label>
+            <div class="task-hint-input ${isChecked ? 'visible' : ''}">
+              <input type="text"
+                     id="hint-${task.id}"
+                     placeholder="${defaultHint}"
+                     value="${escapeHtml(customHint)}"
+                     onchange="updateTaskHint('${task.id}', this.value)">
+            </div>
+          </div>
         `;
       });
 
       container.innerHTML = html;
+    }
+
+    function getDefaultHint(taskId) {
+      const defaults = {
+        'feed-morning': 'Start the day right!',
+        'feed-evening': 'Dinner time!',
+        'water': 'Keep it clean!',
+        'walk': 'Get some exercise!',
+        'play': '10 minutes of fun!',
+        'brush': 'Keep them fluffy!',
+        'clean': 'Nice and tidy!',
+        'check': 'Eyes, ears, nose'
+      };
+      return defaults[taskId] || 'Tap when done!';
+    }
+
+    function toggleTaskHint(taskId, isChecked) {
+      const wrapper = document.querySelector(`#hint-${taskId}`).closest('.task-check-wrapper');
+      const hintDiv = wrapper.querySelector('.task-hint-input');
+      if (isChecked) {
+        wrapper.classList.add('expanded');
+        hintDiv.classList.add('visible');
+      } else {
+        wrapper.classList.remove('expanded');
+        hintDiv.classList.remove('visible');
+        // Clear hint when unchecked
+        delete taskHints[taskId];
+      }
+    }
+
+    function updateTaskHint(taskId, value) {
+      if (value.trim()) {
+        taskHints[taskId] = value.trim();
+      } else {
+        delete taskHints[taskId];
+      }
     }
 
     let selectedEmoji = '📌';
@@ -255,8 +307,8 @@
         tasks.push(ct.id);
       });
 
-      // Update pet
-      updatePet(currentPetId, { name, breed, tasks, customTasks });
+      // Update pet with tasks and custom hints
+      updatePet(currentPetId, { name, breed, tasks, customTasks, taskHints });
 
       // Redirect back to pet view
       window.location.href = `pet-view.html?id=${currentPetId}`;

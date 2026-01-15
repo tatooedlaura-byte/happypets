@@ -335,9 +335,11 @@ function renderTasks(pet) {
   if (!container) return;
 
   let html = '';
+  const customHints = pet.taskHints || {};
 
   pet.tasks.forEach(taskId => {
     let task;
+    let hintText;
 
     // Check if it's a preset task or custom task
     if (taskId.startsWith('custom_')) {
@@ -349,9 +351,12 @@ function renderTasks(pet) {
         name: customTask.name,
         time: 'Tap when done!'
       };
+      hintText = task.time;
     } else {
       task = TASK_CONFIG[taskId];
       if (!task) return;
+      // Use custom hint if available, otherwise use default
+      hintText = customHints[taskId] || task.time;
     }
 
     const isComplete = isTaskComplete(pet.id, taskId);
@@ -362,7 +367,7 @@ function renderTasks(pet) {
         <div class="task-icon">${task.icon}</div>
         <div class="task-content">
           <div class="task-name">${escapeHtml(task.name)}</div>
-          <div class="task-time">${isComplete ? 'Done! ✨' : task.time}</div>
+          <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(hintText)}</div>
         </div>
         <div class="task-check">${isComplete ? '✓' : ''}</div>
       </button>
