@@ -30,51 +30,94 @@
         <input type="text" id="pet-breed" placeholder="e.g., Golden Retriever">
       </div>
 
-      <!-- Collapsible: Care Tasks -->
+      <!-- Add Tasks Section -->
       <div class="collapsible-section open">
         <button type="button" class="collapsible-header" onclick="toggleSection(this)">
-          <span>📋 Care Tasks</span>
+          <span>➕ Add Tasks</span>
           <span class="collapse-icon">▼</span>
         </button>
         <div class="collapsible-content">
-          <div class="task-checklist" id="task-checklist">
-            <!-- Tasks rendered by JavaScript -->
+          <p class="form-hint">Tap a task type to add it:</p>
+          <div class="task-type-grid" id="task-type-grid">
+            <button type="button" class="task-type-btn" onclick="openTaskForm('🥣', 'Food', 'e.g., 1 cup of kibble')">
+              <span class="task-type-icon">🥣</span>
+              <span class="task-type-label">Food</span>
+            </button>
+            <button type="button" class="task-type-btn" onclick="openTaskForm('💧', 'Water', 'e.g., Fresh bowl')">
+              <span class="task-type-icon">💧</span>
+              <span class="task-type-label">Water</span>
+            </button>
+            <button type="button" class="task-type-btn" onclick="openTaskForm('🚶', 'Walk', 'e.g., 3 laps around block')">
+              <span class="task-type-icon">🚶</span>
+              <span class="task-type-label">Walk</span>
+            </button>
+            <button type="button" class="task-type-btn" onclick="openTaskForm('🎾', 'Play', 'e.g., 10 min fetch')">
+              <span class="task-type-icon">🎾</span>
+              <span class="task-type-label">Play</span>
+            </button>
+            <button type="button" class="task-type-btn" onclick="openTaskForm('🪥', 'Brush', 'e.g., Full coat')">
+              <span class="task-type-icon">🪥</span>
+              <span class="task-type-label">Brush</span>
+            </button>
+            <button type="button" class="task-type-btn" onclick="openTaskForm('🧹', 'Clean', 'e.g., Litter box')">
+              <span class="task-type-icon">🧹</span>
+              <span class="task-type-label">Clean</span>
+            </button>
+            <button type="button" class="task-type-btn" onclick="openTaskForm('💊', 'Medicine', 'e.g., 1 pill with food')">
+              <span class="task-type-icon">💊</span>
+              <span class="task-type-label">Medicine</span>
+            </button>
+            <button type="button" class="task-type-btn" onclick="openTaskForm('👀', 'Check', 'e.g., Eyes, ears, nose')">
+              <span class="task-type-icon">👀</span>
+              <span class="task-type-label">Check</span>
+            </button>
+            <button type="button" class="task-type-btn" onclick="openTaskForm('🛁', 'Bath', 'e.g., Full wash')">
+              <span class="task-type-icon">🛁</span>
+              <span class="task-type-label">Bath</span>
+            </button>
+            <button type="button" class="task-type-btn" onclick="openTaskForm('✂️', 'Groom', 'e.g., Trim nails')">
+              <span class="task-type-icon">✂️</span>
+              <span class="task-type-label">Groom</span>
+            </button>
+            <button type="button" class="task-type-btn" onclick="openTaskForm('🚗', 'Trip', 'e.g., Vet visit')">
+              <span class="task-type-icon">🚗</span>
+              <span class="task-type-label">Trip</span>
+            </button>
+            <button type="button" class="task-type-btn" onclick="openTaskForm('📌', 'Other', 'Describe the task')">
+              <span class="task-type-icon">📌</span>
+              <span class="task-type-label">Other</span>
+            </button>
+          </div>
+
+          <!-- Task Form Popup -->
+          <div id="task-form-popup" class="task-form-popup" style="display: none;">
+            <div class="task-form-header">
+              <span id="task-form-icon" class="task-form-icon">🥣</span>
+              <span id="task-form-type" class="task-form-type">Food</span>
+            </div>
+            <div class="task-form-fields">
+              <label>Task Name</label>
+              <input type="text" id="task-form-name" placeholder="e.g., Breakfast">
+              <label>Details <span class="optional">(optional)</span></label>
+              <input type="text" id="task-form-details" placeholder="e.g., 1 cup of kibble">
+            </div>
+            <div class="task-form-buttons">
+              <button type="button" class="task-form-cancel" onclick="closeTaskForm()">Cancel</button>
+              <button type="button" class="task-form-add" onclick="submitTaskForm()">Add Task</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Collapsible: Add Custom Task -->
-      <div class="collapsible-section">
+      <!-- Current Tasks List -->
+      <div class="collapsible-section open" id="current-tasks-section">
         <button type="button" class="collapsible-header" onclick="toggleSection(this)">
-          <span>✨ Add Custom Task</span>
+          <span>📋 Current Tasks</span>
           <span class="collapse-icon">▼</span>
         </button>
         <div class="collapsible-content">
-          <p class="form-hint">Pick an icon:</p>
-          <div class="emoji-picker" id="emoji-picker">
-            <button type="button" class="emoji-option selected" data-emoji="🥣">🥣</button>
-            <button type="button" class="emoji-option" data-emoji="💧">💧</button>
-            <button type="button" class="emoji-option" data-emoji="🍖">🍖</button>
-            <button type="button" class="emoji-option" data-emoji="🦴">🦴</button>
-            <button type="button" class="emoji-option" data-emoji="💊">💊</button>
-            <button type="button" class="emoji-option" data-emoji="🩺">🩺</button>
-            <button type="button" class="emoji-option" data-emoji="💉">💉</button>
-            <button type="button" class="emoji-option" data-emoji="✂️">✂️</button>
-            <button type="button" class="emoji-option" data-emoji="🛁">🛁</button>
-            <button type="button" class="emoji-option" data-emoji="🦷">🦷</button>
-            <button type="button" class="emoji-option" data-emoji="🧴">🧴</button>
-            <button type="button" class="emoji-option" data-emoji="⏰">⏰</button>
-            <button type="button" class="emoji-option" data-emoji="🚗">🚗</button>
-            <button type="button" class="emoji-option" data-emoji="🧹">🧹</button>
-            <button type="button" class="emoji-option" data-emoji="📌">📌</button>
-          </div>
-          <div class="custom-task-row">
-            <input type="text" id="custom-task-name" placeholder="e.g., Give medicine" class="task-name-input">
-            <button type="button" onclick="addCustomTask()" class="add-task-btn">+</button>
-          </div>
-          <!-- Custom Tasks List -->
-          <div id="custom-tasks-list" class="custom-tasks-list">
-            <!-- Custom tasks will appear here -->
+          <div id="tasks-list" class="tasks-list">
+            <p class="empty-tasks">No tasks yet. Tap a task type above to add one.</p>
           </div>
         </div>
       </div>
@@ -133,20 +176,9 @@
     }
 
     let currentPetId = null;
-    let customTasks = [];
-    let taskOrder = [];
-
-    // Preset tasks
-    const PRESET_TASKS = [
-      { id: 'feed-morning', icon: '🥣', name: 'Morning Food' },
-      { id: 'feed-evening', icon: '🥣', name: 'Evening Food' },
-      { id: 'water', icon: '💧', name: 'Fresh Water' },
-      { id: 'walk', icon: '🚶', name: 'Walk' },
-      { id: 'play', icon: '🎾', name: 'Playtime' },
-      { id: 'brush', icon: '🪥', name: 'Brush Fur' },
-      { id: 'clean', icon: '🧹', name: 'Clean Cage/Litter' },
-      { id: 'check', icon: '👀', name: 'Health Check' }
-    ];
+    let tasks = []; // All tasks are now stored here
+    let currentFormIcon = '';
+    let currentFormType = '';
 
     function init() {
       currentPetId = getUrlParam('id');
@@ -175,47 +207,79 @@
       document.getElementById('pet-name').value = pet.name;
       document.getElementById('pet-breed').value = pet.breed || '';
 
-      // Load custom tasks from pet
-      customTasks = pet.customTasks || [];
+      // Load tasks - now all tasks are in customTasks
+      tasks = pet.customTasks || [];
 
-      // Load task order (or use pet.tasks if no explicit order)
-      taskOrder = pet.tasks || [];
-
-      // Render task checkboxes
-      renderTaskCheckboxes(pet.tasks || []);
-      renderCustomTasksList();
+      renderTasksList();
       renderTaskOrderList();
-
-      // Setup emoji picker
-      setupEmojiPicker();
     }
 
-    let taskHints = {};
+    // ============================================
+    // TASK FORM POPUP
+    // ============================================
 
-    function renderTaskCheckboxes(selectedTasks) {
-      const container = document.getElementById('task-checklist');
-      const pet = getPet(currentPetId);
-      taskHints = pet.taskHints || {};
+    function openTaskForm(icon, type, placeholder) {
+      currentFormIcon = icon;
+      currentFormType = type;
+
+      document.getElementById('task-form-icon').textContent = icon;
+      document.getElementById('task-form-type').textContent = type;
+      document.getElementById('task-form-name').placeholder = type;
+      document.getElementById('task-form-name').value = '';
+      document.getElementById('task-form-details').placeholder = placeholder;
+      document.getElementById('task-form-details').value = '';
+
+      document.getElementById('task-form-popup').style.display = 'block';
+      document.getElementById('task-form-name').focus();
+    }
+
+    function closeTaskForm() {
+      document.getElementById('task-form-popup').style.display = 'none';
+    }
+
+    function submitTaskForm() {
+      const nameInput = document.getElementById('task-form-name');
+      const detailsInput = document.getElementById('task-form-details');
+
+      const name = nameInput.value.trim() || currentFormType;
+      const details = detailsInput.value.trim() || 'Tap when done!';
+
+      // Create task
+      const id = 'task_' + Date.now();
+      tasks.push({
+        id,
+        icon: currentFormIcon,
+        name,
+        details
+      });
+
+      renderTasksList();
+      renderTaskOrderList();
+      closeTaskForm();
+    }
+
+    // ============================================
+    // TASKS LIST
+    // ============================================
+
+    function renderTasksList() {
+      const container = document.getElementById('tasks-list');
+
+      if (tasks.length === 0) {
+        container.innerHTML = '<p class="empty-tasks">No tasks yet. Tap a task type above to add one.</p>';
+        return;
+      }
 
       let html = '';
-      PRESET_TASKS.forEach(task => {
-        const isChecked = selectedTasks.includes(task.id);
-        const customHint = taskHints[task.id] || '';
-        const defaultHint = getDefaultHint(task.id);
-
+      tasks.forEach((task, index) => {
         html += `
-          <div class="task-check-wrapper ${isChecked ? 'expanded' : ''}">
-            <label class="task-check-option">
-              <input type="checkbox" name="tasks" value="${task.id}" ${isChecked ? 'checked' : ''} onchange="toggleTaskHint('${task.id}', this.checked)">
-              <span class="task-check-card">${task.icon} ${task.name}</span>
-            </label>
-            <div class="task-hint-input ${isChecked ? 'visible' : ''}">
-              <input type="text"
-                     id="hint-${task.id}"
-                     placeholder="${defaultHint}"
-                     value="${escapeHtml(customHint)}"
-                     onchange="updateTaskHint('${task.id}', this.value)">
+          <div class="task-list-item">
+            <span class="task-list-icon">${task.icon}</span>
+            <div class="task-list-info">
+              <div class="task-list-name">${escapeHtml(task.name)}</div>
+              <div class="task-list-details">${escapeHtml(task.details)}</div>
             </div>
+            <button type="button" class="task-delete-btn" onclick="deleteTask('${task.id}')">×</button>
           </div>
         `;
       });
@@ -223,93 +287,37 @@
       container.innerHTML = html;
     }
 
-    function getDefaultHint(taskId) {
-      const defaults = {
-        'feed-morning': 'Start the day right!',
-        'feed-evening': 'Dinner time!',
-        'water': 'Keep it clean!',
-        'walk': 'Get some exercise!',
-        'play': '10 minutes of fun!',
-        'brush': 'Keep them fluffy!',
-        'clean': 'Nice and tidy!',
-        'check': 'Eyes, ears, nose'
-      };
-      return defaults[taskId] || 'Tap when done!';
-    }
-
-    function toggleTaskHint(taskId, isChecked) {
-      const wrapper = document.querySelector(`#hint-${taskId}`).closest('.task-check-wrapper');
-      const hintDiv = wrapper.querySelector('.task-hint-input');
-      if (isChecked) {
-        wrapper.classList.add('expanded');
-        hintDiv.classList.add('visible');
-        // Add to task order if not already there
-        if (!taskOrder.includes(taskId)) {
-          taskOrder.push(taskId);
-        }
-      } else {
-        wrapper.classList.remove('expanded');
-        hintDiv.classList.remove('visible');
-        // Clear hint when unchecked
-        delete taskHints[taskId];
-        // Remove from task order
-        taskOrder = taskOrder.filter(t => t !== taskId);
-      }
+    function deleteTask(taskId) {
+      tasks = tasks.filter(t => t.id !== taskId);
+      renderTasksList();
       renderTaskOrderList();
     }
 
-    function updateTaskHint(taskId, value) {
-      if (value.trim()) {
-        taskHints[taskId] = value.trim();
-      } else {
-        delete taskHints[taskId];
-      }
-    }
+    // ============================================
+    // TASK REORDERING
+    // ============================================
 
     function renderTaskOrderList() {
       const container = document.getElementById('task-order-list');
       const section = document.getElementById('task-order-section');
 
-      // Combine preset and custom tasks in taskOrder
-      const allTasks = taskOrder.filter(id => {
-        // Check if it's a selected preset task or a custom task
-        if (id.startsWith('custom_')) {
-          return customTasks.some(ct => ct.id === id);
-        } else {
-          return document.querySelector(`input[name="tasks"][value="${id}"]`)?.checked;
-        }
-      });
-
-      if (allTasks.length < 2) {
+      if (tasks.length < 2) {
         section.style.display = 'none';
-        section.classList.remove('open');
         return;
       }
 
       section.style.display = 'block';
       section.classList.add('open');
+
       let html = '';
-
-      allTasks.forEach((taskId, index) => {
-        let icon, name;
-
-        if (taskId.startsWith('custom_')) {
-          const ct = customTasks.find(c => c.id === taskId);
-          icon = ct ? ct.icon : '📌';
-          name = ct ? ct.name : 'Custom Task';
-        } else {
-          const preset = PRESET_TASKS.find(p => p.id === taskId);
-          icon = preset ? preset.icon : '📋';
-          name = preset ? preset.name : taskId;
-        }
-
+      tasks.forEach((task, index) => {
         html += `
-          <div class="task-order-item" data-task-id="${taskId}">
-            <span class="task-order-icon">${icon}</span>
-            <span class="task-order-name">${escapeHtml(name)}</span>
+          <div class="task-order-item">
+            <span class="task-order-icon">${task.icon}</span>
+            <span class="task-order-name">${escapeHtml(task.name)}</span>
             <div class="task-order-buttons">
-              <button type="button" class="order-btn" onclick="moveTask('${taskId}', -1)" ${index === 0 ? 'disabled' : ''}>▲</button>
-              <button type="button" class="order-btn" onclick="moveTask('${taskId}', 1)" ${index === allTasks.length - 1 ? 'disabled' : ''}>▼</button>
+              <button type="button" class="order-btn" onclick="moveTask(${index}, -1)" ${index === 0 ? 'disabled' : ''}>▲</button>
+              <button type="button" class="order-btn" onclick="moveTask(${index}, 1)" ${index === tasks.length - 1 ? 'disabled' : ''}>▼</button>
             </div>
           </div>
         `;
@@ -318,90 +326,19 @@
       container.innerHTML = html;
     }
 
-    function moveTask(taskId, direction) {
-      const index = taskOrder.indexOf(taskId);
-      if (index === -1) return;
-
+    function moveTask(index, direction) {
       const newIndex = index + direction;
-      if (newIndex < 0 || newIndex >= taskOrder.length) return;
+      if (newIndex < 0 || newIndex >= tasks.length) return;
 
       // Swap
-      [taskOrder[index], taskOrder[newIndex]] = [taskOrder[newIndex], taskOrder[index]];
+      [tasks[index], tasks[newIndex]] = [tasks[newIndex], tasks[index]];
+      renderTasksList();
       renderTaskOrderList();
     }
 
-    let selectedEmoji = '📌';
-
-    function setupEmojiPicker() {
-      const picker = document.getElementById('emoji-picker');
-      picker.addEventListener('click', function(e) {
-        const btn = e.target.closest('.emoji-option');
-        if (!btn) return;
-
-        // Remove selected from all
-        picker.querySelectorAll('.emoji-option').forEach(b => b.classList.remove('selected'));
-        // Add selected to clicked
-        btn.classList.add('selected');
-        selectedEmoji = btn.dataset.emoji;
-      });
-    }
-
-    function addCustomTask() {
-      const nameInput = document.getElementById('custom-task-name');
-      const name = nameInput.value.trim();
-
-      if (!name) {
-        alert('Please enter a task name');
-        return;
-      }
-
-      // Create unique ID for custom task
-      const id = 'custom_' + Date.now();
-
-      customTasks.push({ id, icon: selectedEmoji, name });
-
-      // Add to task order
-      taskOrder.push(id);
-
-      renderCustomTasksList();
-      renderTaskOrderList();
-
-      // Clear input and reset emoji
-      nameInput.value = '';
-    }
-
-    function removeCustomTask(taskId) {
-      customTasks = customTasks.filter(t => t.id !== taskId);
-
-      // Remove from task order
-      taskOrder = taskOrder.filter(t => t !== taskId);
-
-      renderCustomTasksList();
-      renderTaskOrderList();
-    }
-
-    function renderCustomTasksList() {
-      const container = document.getElementById('custom-tasks-list');
-
-      if (customTasks.length === 0) {
-        container.innerHTML = '';
-        return;
-      }
-
-      let html = '<label class="custom-tasks-label">Your Custom Tasks:</label>';
-
-      customTasks.forEach(task => {
-        html += `
-          <div class="custom-task-item">
-            <span class="custom-task-icon">${task.icon}</span>
-            <span class="custom-task-name">${escapeHtml(task.name)}</span>
-            <button type="button" class="remove-task-btn" onclick="removeCustomTask('${task.id}')">×</button>
-          </div>
-        `;
-      });
-
-      container.innerHTML = html;
-    }
+    // ============================================
+    // FORM SUBMISSION
+    // ============================================
 
     function confirmDelete() {
       if (confirm('Are you sure you want to remove this pet? This cannot be undone.')) {
@@ -410,27 +347,23 @@
       }
     }
 
-    // Handle form submission
     document.getElementById('edit-pet-form').addEventListener('submit', function(e) {
       e.preventDefault();
 
       const name = document.getElementById('pet-name').value.trim();
       const breed = document.getElementById('pet-breed').value.trim();
 
-      // Use taskOrder which preserves the user's custom order
-      // Filter to only include currently selected/active tasks
-      const tasks = taskOrder.filter(taskId => {
-        if (taskId.startsWith('custom_')) {
-          return customTasks.some(ct => ct.id === taskId);
-        } else {
-          return document.querySelector(`input[name="tasks"][value="${taskId}"]`)?.checked;
-        }
+      // Build task IDs array from tasks
+      const taskIds = tasks.map(t => t.id);
+
+      // Update pet - store all task data in customTasks
+      updatePet(currentPetId, {
+        name,
+        breed,
+        tasks: taskIds,
+        customTasks: tasks
       });
 
-      // Update pet with tasks and custom hints
-      updatePet(currentPetId, { name, breed, tasks, customTasks, taskHints });
-
-      // Redirect back to pet view
       window.location.href = `pet-view.html?id=${currentPetId}`;
     });
 
