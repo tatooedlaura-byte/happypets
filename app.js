@@ -335,39 +335,50 @@ function renderTasks(pet) {
   if (!container) return;
 
   let html = '';
-  const customHints = pet.taskHints || {};
+  const customTasks = pet.customTasks || [];
+
+  // If no tasks array, nothing to show
+  if (!pet.tasks || pet.tasks.length === 0) {
+    container.innerHTML = '<p style="text-align:center;color:#7A7A7A;padding:20px;">No tasks set up yet. Tap Edit Pet to add some!</p>';
+    return;
+  }
 
   pet.tasks.forEach(taskId => {
-    let task;
-    let hintText;
+    // Find task in customTasks array (new format)
+    const taskData = customTasks.find(ct => ct.id === taskId);
 
-    // Check if it's a preset task or custom task
-    if (taskId.startsWith('custom_')) {
-      // Find custom task in pet's customTasks array
-      const customTask = (pet.customTasks || []).find(ct => ct.id === taskId);
-      if (!customTask) return;
-      task = {
-        icon: customTask.icon,
-        name: customTask.name,
-        time: 'Tap when done!'
-      };
-      hintText = task.time;
-    } else {
-      task = TASK_CONFIG[taskId];
-      if (!task) return;
-      // Use custom hint if available, otherwise use default
-      hintText = customHints[taskId] || task.time;
+    if (!taskData) {
+      // Legacy support: check old TASK_CONFIG
+      const legacyTask = TASK_CONFIG[taskId];
+      if (!legacyTask) return;
+
+      const isComplete = isTaskComplete(pet.id, taskId);
+      const hintText = (pet.taskHints && pet.taskHints[taskId]) || legacyTask.time;
+
+      html += `
+        <button class="task-button ${isComplete ? 'completed' : ''}"
+                onclick="handleTaskClick('${pet.id}', '${taskId}')">
+          <div class="task-icon">${legacyTask.icon}</div>
+          <div class="task-content">
+            <div class="task-name">${escapeHtml(legacyTask.name)}</div>
+            <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(hintText)}</div>
+          </div>
+          <div class="task-check">${isComplete ? '✓' : ''}</div>
+        </button>
+      `;
+      return;
     }
 
+    // New format: task data from customTasks
     const isComplete = isTaskComplete(pet.id, taskId);
 
     html += `
       <button class="task-button ${isComplete ? 'completed' : ''}"
               onclick="handleTaskClick('${pet.id}', '${taskId}')">
-        <div class="task-icon">${task.icon}</div>
+        <div class="task-icon">${taskData.icon}</div>
         <div class="task-content">
-          <div class="task-name">${escapeHtml(task.name)}</div>
-          <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(hintText)}</div>
+          <div class="task-name">${escapeHtml(taskData.name)}</div>
+          <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(taskData.details || 'Tap when done!')}</div>
         </div>
         <div class="task-check">${isComplete ? '✓' : ''}</div>
       </button>
