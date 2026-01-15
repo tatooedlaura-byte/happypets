@@ -275,3 +275,53 @@
   background: #F8B4C4;
   color: white;
 }
+
+/* Emoji Picker */
+.emoji-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.emoji-option {
+  width: 44px;
+  height: 44px;
+  background: var(--card);
+  border: 2px solid var(--primary-light);
+  border-radius: 10px;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.emoji-option:hover {
+  border-color: var(--primary);
+  transform: scale(1.1);
+}
+
+.emoji-option.selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  transform: scale(1.1);
+}
+
+/* Custom Task Row */
+.custom-task-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.custom-task-row .task-name-input {
+  flex: 1;
+  padding: 15px 18px;
+  font-size: 16px;
+  border: 2px solid var(--primary-light);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+}

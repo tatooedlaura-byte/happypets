@@ -39,13 +39,26 @@
 
       <!-- Custom Task Input -->
       <div class="form-group">
-        <label for="custom-task">Add Custom Task</label>
-        <div class="custom-task-input">
-          <input type="text" id="custom-task-icon" placeholder="🩺" maxlength="2" class="icon-input">
+        <label>Add Custom Task</label>
+        <p class="form-hint">Pick an icon:</p>
+        <div class="emoji-picker" id="emoji-picker">
+          <button type="button" class="emoji-option selected" data-emoji="📌">📌</button>
+          <button type="button" class="emoji-option" data-emoji="💊">💊</button>
+          <button type="button" class="emoji-option" data-emoji="🩺">🩺</button>
+          <button type="button" class="emoji-option" data-emoji="💉">💉</button>
+          <button type="button" class="emoji-option" data-emoji="✂️">✂️</button>
+          <button type="button" class="emoji-option" data-emoji="🛁">🛁</button>
+          <button type="button" class="emoji-option" data-emoji="🦷">🦷</button>
+          <button type="button" class="emoji-option" data-emoji="🧴">🧴</button>
+          <button type="button" class="emoji-option" data-emoji="⏰">⏰</button>
+          <button type="button" class="emoji-option" data-emoji="🚗">🚗</button>
+          <button type="button" class="emoji-option" data-emoji="📞">📞</button>
+          <button type="button" class="emoji-option" data-emoji="🧹">🧹</button>
+        </div>
+        <div class="custom-task-row">
           <input type="text" id="custom-task-name" placeholder="e.g., Give medicine" class="task-name-input">
           <button type="button" onclick="addCustomTask()" class="add-task-btn">+</button>
         </div>
-        <p class="form-hint">Tip: Use an emoji for the icon!</p>
       </div>
 
       <!-- Custom Tasks List -->
@@ -134,6 +147,9 @@
       // Render task checkboxes
       renderTaskCheckboxes(pet.tasks || []);
       renderCustomTasksList();
+
+      // Setup emoji picker
+      setupEmojiPicker();
     }
 
     function renderTaskCheckboxes(selectedTasks) {
@@ -153,11 +169,24 @@
       container.innerHTML = html;
     }
 
-    function addCustomTask() {
-      const iconInput = document.getElementById('custom-task-icon');
-      const nameInput = document.getElementById('custom-task-name');
+    let selectedEmoji = '📌';
 
-      const icon = iconInput.value.trim() || '📌';
+    function setupEmojiPicker() {
+      const picker = document.getElementById('emoji-picker');
+      picker.addEventListener('click', function(e) {
+        const btn = e.target.closest('.emoji-option');
+        if (!btn) return;
+
+        // Remove selected from all
+        picker.querySelectorAll('.emoji-option').forEach(b => b.classList.remove('selected'));
+        // Add selected to clicked
+        btn.classList.add('selected');
+        selectedEmoji = btn.dataset.emoji;
+      });
+    }
+
+    function addCustomTask() {
+      const nameInput = document.getElementById('custom-task-name');
       const name = nameInput.value.trim();
 
       if (!name) {
@@ -168,11 +197,10 @@
       // Create unique ID for custom task
       const id = 'custom_' + Date.now();
 
-      customTasks.push({ id, icon, name });
+      customTasks.push({ id, icon: selectedEmoji, name });
       renderCustomTasksList();
 
-      // Clear inputs
-      iconInput.value = '';
+      // Clear input and reset emoji
       nameInput.value = '';
     }
 
