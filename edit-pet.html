@@ -19,6 +19,7 @@
 
     <!-- Edit Pet Form -->
     <form id="edit-pet-form" class="form-section">
+      <!-- Basic Info - Always visible -->
       <div class="form-group">
         <label for="pet-name">Pet's Name</label>
         <input type="text" id="pet-name" placeholder="What's their name?" required>
@@ -29,49 +30,63 @@
         <input type="text" id="pet-breed" placeholder="e.g., Golden Retriever">
       </div>
 
-      <div class="form-group">
-        <label>Care Tasks</label>
-        <p class="form-hint">Select preset tasks or add your own below</p>
-        <div class="task-checklist" id="task-checklist">
-          <!-- Tasks rendered by JavaScript -->
+      <!-- Collapsible: Care Tasks -->
+      <div class="collapsible-section open">
+        <button type="button" class="collapsible-header" onclick="toggleSection(this)">
+          <span>📋 Care Tasks</span>
+          <span class="collapse-icon">▼</span>
+        </button>
+        <div class="collapsible-content">
+          <div class="task-checklist" id="task-checklist">
+            <!-- Tasks rendered by JavaScript -->
+          </div>
         </div>
       </div>
 
-      <!-- Custom Task Input -->
-      <div class="form-group">
-        <label>Add Custom Task</label>
-        <p class="form-hint">Pick an icon:</p>
-        <div class="emoji-picker" id="emoji-picker">
-          <button type="button" class="emoji-option selected" data-emoji="📌">📌</button>
-          <button type="button" class="emoji-option" data-emoji="💊">💊</button>
-          <button type="button" class="emoji-option" data-emoji="🩺">🩺</button>
-          <button type="button" class="emoji-option" data-emoji="💉">💉</button>
-          <button type="button" class="emoji-option" data-emoji="✂️">✂️</button>
-          <button type="button" class="emoji-option" data-emoji="🛁">🛁</button>
-          <button type="button" class="emoji-option" data-emoji="🦷">🦷</button>
-          <button type="button" class="emoji-option" data-emoji="🧴">🧴</button>
-          <button type="button" class="emoji-option" data-emoji="⏰">⏰</button>
-          <button type="button" class="emoji-option" data-emoji="🚗">🚗</button>
-          <button type="button" class="emoji-option" data-emoji="📞">📞</button>
-          <button type="button" class="emoji-option" data-emoji="🧹">🧹</button>
-        </div>
-        <div class="custom-task-row">
-          <input type="text" id="custom-task-name" placeholder="e.g., Give medicine" class="task-name-input">
-          <button type="button" onclick="addCustomTask()" class="add-task-btn">+</button>
+      <!-- Collapsible: Add Custom Task -->
+      <div class="collapsible-section">
+        <button type="button" class="collapsible-header" onclick="toggleSection(this)">
+          <span>✨ Add Custom Task</span>
+          <span class="collapse-icon">▼</span>
+        </button>
+        <div class="collapsible-content">
+          <p class="form-hint">Pick an icon:</p>
+          <div class="emoji-picker" id="emoji-picker">
+            <button type="button" class="emoji-option selected" data-emoji="📌">📌</button>
+            <button type="button" class="emoji-option" data-emoji="💊">💊</button>
+            <button type="button" class="emoji-option" data-emoji="🩺">🩺</button>
+            <button type="button" class="emoji-option" data-emoji="💉">💉</button>
+            <button type="button" class="emoji-option" data-emoji="✂️">✂️</button>
+            <button type="button" class="emoji-option" data-emoji="🛁">🛁</button>
+            <button type="button" class="emoji-option" data-emoji="🦷">🦷</button>
+            <button type="button" class="emoji-option" data-emoji="🧴">🧴</button>
+            <button type="button" class="emoji-option" data-emoji="⏰">⏰</button>
+            <button type="button" class="emoji-option" data-emoji="🚗">🚗</button>
+            <button type="button" class="emoji-option" data-emoji="📞">📞</button>
+            <button type="button" class="emoji-option" data-emoji="🧹">🧹</button>
+          </div>
+          <div class="custom-task-row">
+            <input type="text" id="custom-task-name" placeholder="e.g., Give medicine" class="task-name-input">
+            <button type="button" onclick="addCustomTask()" class="add-task-btn">+</button>
+          </div>
+          <!-- Custom Tasks List -->
+          <div id="custom-tasks-list" class="custom-tasks-list">
+            <!-- Custom tasks will appear here -->
+          </div>
         </div>
       </div>
 
-      <!-- Custom Tasks List -->
-      <div id="custom-tasks-list" class="custom-tasks-list">
-        <!-- Custom tasks will appear here -->
-      </div>
-
-      <!-- Task Order -->
-      <div class="form-group" id="task-order-section" style="display: none;">
-        <label>Task Order</label>
-        <p class="form-hint">Drag or use arrows to reorder</p>
-        <div id="task-order-list" class="task-order-list">
-          <!-- Ordered tasks rendered by JavaScript -->
+      <!-- Collapsible: Task Order -->
+      <div class="collapsible-section" id="task-order-section" style="display: none;">
+        <button type="button" class="collapsible-header" onclick="toggleSection(this)">
+          <span>↕️ Reorder Tasks</span>
+          <span class="collapse-icon">▼</span>
+        </button>
+        <div class="collapsible-content">
+          <p class="form-hint">Use arrows to change order</p>
+          <div id="task-order-list" class="task-order-list">
+            <!-- Ordered tasks rendered by JavaScript -->
+          </div>
         </div>
       </div>
 
@@ -108,6 +123,12 @@
 
   <script src="app.js"></script>
   <script>
+    // Collapsible sections
+    function toggleSection(button) {
+      const section = button.closest('.collapsible-section');
+      section.classList.toggle('open');
+    }
+
     let currentPetId = null;
     let customTasks = [];
     let taskOrder = [];
@@ -258,10 +279,12 @@
 
       if (allTasks.length < 2) {
         section.style.display = 'none';
+        section.classList.remove('open');
         return;
       }
 
       section.style.display = 'block';
+      section.classList.add('open');
       let html = '';
 
       allTasks.forEach((taskId, index) => {

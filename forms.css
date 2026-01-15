@@ -5,6 +5,56 @@
   padding-bottom: 100px;
 }
 
+/* Collapsible Sections */
+.collapsible-section {
+  background: var(--card);
+  border-radius: 16px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 8px var(--shadow);
+  overflow: hidden;
+}
+
+.collapsible-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.collapsible-header:hover {
+  background: rgba(124, 159, 232, 0.1);
+}
+
+.collapse-icon {
+  font-size: 12px;
+  color: var(--text-light);
+  transition: transform 0.3s ease;
+}
+
+.collapsible-section.open .collapse-icon {
+  transform: rotate(180deg);
+}
+
+.collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding: 0 20px;
+}
+
+.collapsible-section.open .collapsible-content {
+  max-height: 2000px;
+  padding: 0 20px 20px;
+}
+
 .form-group {
   margin-bottom: 25px;
 }
