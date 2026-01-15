@@ -724,8 +724,11 @@
 }
 
 .day-option span {
-  display: block;
-  padding: 10px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
   background: var(--card);
   border: 2px solid var(--primary-light);
   border-radius: 8px;
@@ -733,7 +736,7 @@
   font-weight: 600;
   color: var(--text);
   text-align: center;
-  transition: all 0.2s;
+  box-sizing: border-box;
 }
 
 .day-option input:checked + span {
