@@ -709,10 +709,14 @@
   padding: 8px;
   background: var(--background);
   border-radius: 10px;
+  align-items: center;
 }
 
 .day-option {
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .day-option input {
