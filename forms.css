@@ -700,11 +700,10 @@
   color: white;
 }
 
-/* Day Picker */
+/* Day Picker - display is controlled by JavaScript */
 .day-picker {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
+  flex-direction: row;
+  flex-wrap: nowrap;
   justify-content: space-between;
   align-items: center;
   gap: 4px;
