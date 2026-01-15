@@ -100,6 +100,28 @@
               <input type="text" id="task-form-name" placeholder="e.g., Breakfast">
               <label>Details <span class="optional">(optional)</span></label>
               <input type="text" id="task-form-details" placeholder="e.g., 1 cup of kibble">
+
+              <label>Schedule</label>
+              <div class="schedule-options">
+                <label class="schedule-option">
+                  <input type="radio" name="schedule" value="daily" checked onchange="toggleDayPicker()">
+                  <span class="schedule-label">Daily</span>
+                </label>
+                <label class="schedule-option">
+                  <input type="radio" name="schedule" value="weekly" onchange="toggleDayPicker()">
+                  <span class="schedule-label">Certain days</span>
+                </label>
+              </div>
+
+              <div id="day-picker" class="day-picker" style="display: none;">
+                <label class="day-option"><input type="checkbox" name="days" value="0"><span>Sun</span></label>
+                <label class="day-option"><input type="checkbox" name="days" value="1"><span>Mon</span></label>
+                <label class="day-option"><input type="checkbox" name="days" value="2"><span>Tue</span></label>
+                <label class="day-option"><input type="checkbox" name="days" value="3"><span>Wed</span></label>
+                <label class="day-option"><input type="checkbox" name="days" value="4"><span>Thu</span></label>
+                <label class="day-option"><input type="checkbox" name="days" value="5"><span>Fri</span></label>
+                <label class="day-option"><input type="checkbox" name="days" value="6"><span>Sat</span></label>
+              </div>
             </div>
             <div class="task-form-buttons">
               <button type="button" class="task-form-cancel" onclick="closeTaskForm()">Cancel</button>
@@ -232,6 +254,11 @@
       document.getElementById('task-form-details').value = '';
       document.querySelector('.task-form-add').textContent = 'Add Task';
 
+      // Reset schedule to daily
+      document.querySelector('input[name="schedule"][value="daily"]').checked = true;
+      document.querySelectorAll('input[name="days"]').forEach(cb => cb.checked = false);
+      document.getElementById('day-picker').style.display = 'none';
+
       document.getElementById('task-form-popup').style.display = 'block';
       document.getElementById('task-form-name').focus();
     }
@@ -252,6 +279,16 @@
       document.getElementById('task-form-details').value = task.details || '';
       document.querySelector('.task-form-add').textContent = 'Save Changes';
 
+      // Set schedule
+      const isWeekly = task.schedule === 'weekly';
+      document.querySelector(`input[name="schedule"][value="${isWeekly ? 'weekly' : 'daily'}"]`).checked = true;
+      document.getElementById('day-picker').style.display = isWeekly ? 'flex' : 'none';
+
+      // Set days
+      document.querySelectorAll('input[name="days"]').forEach(cb => {
+        cb.checked = task.days && task.days.includes(parseInt(cb.value));
+      });
+
       document.getElementById('task-form-popup').style.display = 'block';
       document.getElementById('task-form-name').focus();
     }
@@ -261,6 +298,11 @@
       editingTaskId = null;
     }
 
+    function toggleDayPicker() {
+      const isWeekly = document.querySelector('input[name="schedule"]:checked').value === 'weekly';
+      document.getElementById('day-picker').style.display = isWeekly ? 'flex' : 'none';
+    }
+
     function submitTaskForm() {
       const nameInput = document.getElementById('task-form-name');
       const detailsInput = document.getElementById('task-form-details');
@@ -268,12 +310,19 @@
       const name = nameInput.value.trim() || currentFormType;
       const details = detailsInput.value.trim() || 'Tap when done!';
 
+      // Get schedule
+      const schedule = document.querySelector('input[name="schedule"]:checked').value;
+      const dayCheckboxes = document.querySelectorAll('input[name="days"]:checked');
+      const days = Array.from(dayCheckboxes).map(cb => parseInt(cb.value));
+
       if (editingTaskId) {
         // Update existing task
         const task = tasks.find(t => t.id === editingTaskId);
         if (task) {
           task.name = name;
           task.details = details;
+          task.schedule = schedule;
+          task.days = schedule === 'weekly' ? days : [];
         }
       } else {
         // Create new task
@@ -282,7 +331,9 @@
           id,
           icon: currentFormIcon,
           name,
-          details
+          details,
+          schedule,
+          days: schedule === 'weekly' ? days : []
         });
       }
 
@@ -295,6 +346,18 @@
     // TASKS LIST
     // ============================================
 
+    const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    function getScheduleLabel(task) {
+      if (!task.schedule || task.schedule === 'daily') {
+        return 'Daily';
+      }
+      if (task.days && task.days.length > 0) {
+        return task.days.map(d => DAY_NAMES[d]).join(', ');
+      }
+      return 'No days selected';
+    }
+
     function renderTasksList() {
       const container = document.getElementById('tasks-list');
 
@@ -305,12 +368,14 @@
 
       let html = '';
       tasks.forEach((task, index) => {
+        const scheduleLabel = getScheduleLabel(task);
         html += `
           <div class="task-list-item">
             <span class="task-list-icon">${task.icon}</span>
             <div class="task-list-info" onclick="editTask('${task.id}')">
               <div class="task-list-name">${escapeHtml(task.name)}</div>
               <div class="task-list-details">${escapeHtml(task.details || 'Tap when done!')}</div>
+              <div class="task-list-schedule">📅 ${scheduleLabel}</div>
             </div>
             <button type="button" class="task-edit-btn" onclick="editTask('${task.id}')">✎</button>
             <button type="button" class="task-delete-btn" onclick="deleteTask('${task.id}')">×</button>

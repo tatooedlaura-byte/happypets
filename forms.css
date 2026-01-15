@@ -667,6 +667,71 @@
   text-overflow: ellipsis;
 }
 
+.task-list-schedule {
+  font-size: 11px;
+  color: var(--primary);
+  margin-top: 2px;
+}
+
+/* Schedule Options */
+.schedule-options {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.schedule-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.schedule-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.schedule-label {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Day Picker */
+.day-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.day-option {
+  cursor: pointer;
+}
+
+.day-option input {
+  display: none;
+}
+
+.day-option span {
+  display: block;
+  padding: 8px 12px;
+  background: var(--background);
+  border: 2px solid var(--primary-light);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.day-option input:checked + span {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
 .task-edit-btn {
   width: 32px;
   height: 32px;

@@ -330,6 +330,19 @@ function renderPetDetail(petId) {
   renderFunFact(pet.type);
 }
 
+function shouldShowTaskToday(taskData) {
+  // No schedule means daily (show every day)
+  if (!taskData.schedule || taskData.schedule === 'daily') {
+    return true;
+  }
+  // Weekly: check if today's day is in the days array
+  if (taskData.schedule === 'weekly') {
+    const today = new Date().getDay(); // 0 = Sunday, 6 = Saturday
+    return taskData.days && taskData.days.includes(today);
+  }
+  return true;
+}
+
 function renderTasks(pet) {
   const container = document.getElementById('task-list');
   if (!container) return;
@@ -343,15 +356,18 @@ function renderTasks(pet) {
     return;
   }
 
+  let tasksShown = 0;
+
   pet.tasks.forEach(taskId => {
     // Find task in customTasks array (new format)
     const taskData = customTasks.find(ct => ct.id === taskId);
 
     if (!taskData) {
-      // Legacy support: check old TASK_CONFIG
+      // Legacy support: check old TASK_CONFIG (always show daily)
       const legacyTask = TASK_CONFIG[taskId];
       if (!legacyTask) return;
 
+      tasksShown++;
       const isComplete = isTaskComplete(pet.id, taskId);
       const hintText = (pet.taskHints && pet.taskHints[taskId]) || legacyTask.time;
 
@@ -369,6 +385,13 @@ function renderTasks(pet) {
       return;
     }
 
+    // Check if task should show today
+    if (!shouldShowTaskToday(taskData)) {
+      return;
+    }
+
+    tasksShown++;
+
     // New format: task data from customTasks
     const isComplete = isTaskComplete(pet.id, taskId);
 
@@ -384,6 +407,10 @@ function renderTasks(pet) {
       </button>
     `;
   });
+
+  if (tasksShown === 0) {
+    html = '<p style="text-align:center;color:#7A7A7A;padding:20px;">No tasks scheduled for today! 🎉</p>';
+  }
 
   container.innerHTML = html;
 }
