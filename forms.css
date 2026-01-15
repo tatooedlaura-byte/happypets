@@ -646,6 +646,11 @@
 .task-list-info {
   flex: 1;
   min-width: 0;
+  cursor: pointer;
+}
+
+.task-list-info:hover {
+  opacity: 0.8;
 }
 
 .task-list-name {
@@ -660,6 +665,26 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.task-edit-btn {
+  width: 32px;
+  height: 32px;
+  background: var(--primary-light);
+  border: none;
+  border-radius: 50%;
+  color: var(--primary);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.task-edit-btn:hover {
+  background: var(--primary);
+  color: white;
 }
 
 .task-delete-btn {

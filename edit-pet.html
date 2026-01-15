@@ -179,6 +179,7 @@
     let tasks = []; // All tasks are now stored here
     let currentFormIcon = '';
     let currentFormType = '';
+    let editingTaskId = null; // Track if we're editing an existing task
 
     function init() {
       currentPetId = getUrlParam('id');
@@ -219,6 +220,7 @@
     // ============================================
 
     function openTaskForm(icon, type, placeholder) {
+      editingTaskId = null; // New task, not editing
       currentFormIcon = icon;
       currentFormType = type;
 
@@ -228,6 +230,27 @@
       document.getElementById('task-form-name').value = '';
       document.getElementById('task-form-details').placeholder = placeholder;
       document.getElementById('task-form-details').value = '';
+      document.querySelector('.task-form-add').textContent = 'Add Task';
+
+      document.getElementById('task-form-popup').style.display = 'block';
+      document.getElementById('task-form-name').focus();
+    }
+
+    function editTask(taskId) {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      editingTaskId = taskId;
+      currentFormIcon = task.icon;
+      currentFormType = task.name;
+
+      document.getElementById('task-form-icon').textContent = task.icon;
+      document.getElementById('task-form-type').textContent = 'Edit Task';
+      document.getElementById('task-form-name').placeholder = 'Task name';
+      document.getElementById('task-form-name').value = task.name;
+      document.getElementById('task-form-details').placeholder = 'Details';
+      document.getElementById('task-form-details').value = task.details || '';
+      document.querySelector('.task-form-add').textContent = 'Save Changes';
 
       document.getElementById('task-form-popup').style.display = 'block';
       document.getElementById('task-form-name').focus();
@@ -235,6 +258,7 @@
 
     function closeTaskForm() {
       document.getElementById('task-form-popup').style.display = 'none';
+      editingTaskId = null;
     }
 
     function submitTaskForm() {
@@ -244,14 +268,23 @@
       const name = nameInput.value.trim() || currentFormType;
       const details = detailsInput.value.trim() || 'Tap when done!';
 
-      // Create task
-      const id = 'task_' + Date.now();
-      tasks.push({
-        id,
-        icon: currentFormIcon,
-        name,
-        details
-      });
+      if (editingTaskId) {
+        // Update existing task
+        const task = tasks.find(t => t.id === editingTaskId);
+        if (task) {
+          task.name = name;
+          task.details = details;
+        }
+      } else {
+        // Create new task
+        const id = 'task_' + Date.now();
+        tasks.push({
+          id,
+          icon: currentFormIcon,
+          name,
+          details
+        });
+      }
 
       renderTasksList();
       renderTaskOrderList();
@@ -275,10 +308,11 @@
         html += `
           <div class="task-list-item">
             <span class="task-list-icon">${task.icon}</span>
-            <div class="task-list-info">
+            <div class="task-list-info" onclick="editTask('${task.id}')">
               <div class="task-list-name">${escapeHtml(task.name)}</div>
-              <div class="task-list-details">${escapeHtml(task.details)}</div>
+              <div class="task-list-details">${escapeHtml(task.details || 'Tap when done!')}</div>
             </div>
+            <button type="button" class="task-edit-btn" onclick="editTask('${task.id}')">✎</button>
             <button type="button" class="task-delete-btn" onclick="deleteTask('${task.id}')">×</button>
           </div>
         `;
