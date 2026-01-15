@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Pet - Happy Pets</title>
-  <link rel="stylesheet" href="styles.css?v=11">
-  <link rel="stylesheet" href="forms.css?v=11">
+  <link rel="stylesheet" href="styles.css?v=12">
+  <link rel="stylesheet" href="forms.css?v=12">
 </head>
 <body>
   <div class="app">
@@ -108,7 +108,7 @@
               </div>
               <input type="hidden" name="schedule" id="schedule-value" value="daily">
 
-              <div id="day-picker" class="day-picker" style="display: none;">
+              <div id="day-picker" class="day-picker">
                 <label class="day-option"><input type="checkbox" name="days" value="0"><span>Sun</span></label>
                 <label class="day-option"><input type="checkbox" name="days" value="1"><span>Mon</span></label>
                 <label class="day-option"><input type="checkbox" name="days" value="2"><span>Tue</span></label>
@@ -184,7 +184,7 @@
     </nav>
   </div>
 
-  <script src="app.js?v=11"></script>
+  <script src="app.js?v=12"></script>
   <script>
     // Collapsible sections
     function toggleSection(button) {
@@ -295,12 +295,12 @@
       document.querySelectorAll('.schedule-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.value === value);
       });
-      document.getElementById('day-picker').style.display = value === 'weekly' ? 'grid' : 'none';
+      document.getElementById('day-picker').classList.toggle('visible', value === 'weekly');
     }
 
     function toggleDayPicker() {
       const isWeekly = document.getElementById('schedule-value').value === 'weekly';
-      document.getElementById('day-picker').style.display = isWeekly ? 'grid' : 'none';
+      document.getElementById('day-picker').classList.toggle('visible', isWeekly);
     }
 
     function submitTaskForm() {

@@ -700,8 +700,9 @@
   color: white;
 }
 
-/* Day Picker - display is controlled by JavaScript */
+/* Day Picker - hidden by default, shown with .visible class */
 .day-picker {
+  display: none;
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: space-between;
@@ -711,6 +712,10 @@
   padding: 8px;
   background: var(--background);
   border-radius: 10px;
+}
+
+.day-picker.visible {
+  display: flex;
 }
 
 .day-option {
