@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Today - Happy Pets</title>
+  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="forms.css?v=3">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <h1>📅 Today's Tasks</h1>
+      <p class="subtitle" id="today-date"></p>
+    </header>
+
+    <!-- Progress Summary -->
+    <section class="today-summary" id="today-summary">
+      <div class="summary-circle">
+        <span class="summary-count" id="completed-count">0</span>
+        <span class="summary-total">/ <span id="total-count">0</span></span>
+      </div>
+      <p class="summary-label">tasks completed</p>
+    </section>
+
+    <!-- All Tasks -->
+    <main class="today-tasks" id="today-tasks">
+      <!-- Tasks will be rendered here -->
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </a>
+      <a href="today.html" class="nav-item active">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">Today</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">📸</span>
+        <span class="nav-label">Memories</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">👨‍👩‍👧</span>
+        <span class="nav-label">Family</span>
+      </a>
+    </nav>
+  </div>
+
+  <script src="app.js?v=3"></script>
+  <script>
+    // Format today's date nicely
+    function formatDate() {
+      const options = { weekday: 'long', month: 'long', day: 'numeric' };
+      return new Date().toLocaleDateString('en-US', options);
+    }
+
+    // Render all tasks for all pets
+    function renderTodayTasks() {
+      const container = document.getElementById('today-tasks');
+      const pets = getPets();
+
+      if (pets.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>No pets yet!</p>
+            <a href="add-pet.html" class="add-pet-link">Add your first pet</a>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      let totalTasks = 0;
+      let completedTasks = 0;
+
+      pets.forEach(pet => {
+        const config = PET_CONFIG[pet.type] || PET_CONFIG.dog;
+        const customTasks = pet.customTasks || [];
+
+        if (!pet.tasks || pet.tasks.length === 0) return;
+
+        let petTasksHtml = '';
+        let petHasTasks = false;
+
+        pet.tasks.forEach(taskId => {
+          // Find task in customTasks array (new format)
+          const taskData = customTasks.find(ct => ct.id === taskId);
+
+          if (!taskData) {
+            // Legacy support: check old TASK_CONFIG
+            const legacyTask = TASK_CONFIG[taskId];
+            if (!legacyTask) return;
+
+            petHasTasks = true;
+            totalTasks++;
+            const isComplete = isTaskComplete(pet.id, taskId);
+            if (isComplete) completedTasks++;
+
+            const hintText = (pet.taskHints && pet.taskHints[taskId]) || legacyTask.time;
+
+            petTasksHtml += `
+              <button class="task-button ${isComplete ? 'completed' : ''}"
+                      onclick="handleTodayTaskClick('${pet.id}', '${taskId}')">
+                <div class="task-icon">${legacyTask.icon}</div>
+                <div class="task-content">
+                  <div class="task-name">${escapeHtml(legacyTask.name)}</div>
+                  <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(hintText)}</div>
+                </div>
+                <div class="task-check">${isComplete ? '✓' : ''}</div>
+              </button>
+            `;
+            return;
+          }
+
+          // Check if task should show today
+          if (!shouldShowTaskToday(taskData)) return;
+
+          petHasTasks = true;
+          totalTasks++;
+          const isComplete = isTaskComplete(pet.id, taskId);
+          if (isComplete) completedTasks++;
+
+          petTasksHtml += `
+            <button class="task-button ${isComplete ? 'completed' : ''}"
+                    onclick="handleTodayTaskClick('${pet.id}', '${taskId}')">
+              <div class="task-icon">${taskData.icon}</div>
+              <div class="task-content">
+                <div class="task-name">${escapeHtml(taskData.name)}</div>
+                <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(taskData.details || 'Tap when done!')}</div>
+              </div>
+              <div class="task-check">${isComplete ? '✓' : ''}</div>
+            </button>
+          `;
+        });
+
+        if (petHasTasks) {
+          html += `
+            <div class="pet-task-group">
+              <div class="pet-task-header">
+                <span class="pet-task-avatar" style="background: ${config.color}">${config.emoji}</span>
+                <span class="pet-task-name">${escapeHtml(pet.name)}</span>
+              </div>
+              <div class="pet-task-list">
+                ${petTasksHtml}
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      if (html === '') {
+        html = `
+          <div class="empty-state">
+            <p>No tasks scheduled for today!</p>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+
+      // Update summary
+      document.getElementById('completed-count').textContent = completedTasks;
+      document.getElementById('total-count').textContent = totalTasks;
+
+      // Update summary circle color
+      const summaryEl = document.getElementById('today-summary');
+      if (totalTasks > 0 && completedTasks === totalTasks) {
+        summaryEl.classList.add('all-done');
+      } else {
+        summaryEl.classList.remove('all-done');
+      }
+    }
+
+    // Handle task click from Today view
+    function handleTodayTaskClick(petId, taskId) {
+      const isNowComplete = toggleTask(petId, taskId);
+      renderTodayTasks();
+      if (isNowComplete) {
+        showCelebration();
+      }
+    }
+
+    // Initialize
+    document.getElementById('today-date').textContent = formatDate();
+    renderTodayTasks();
+  </script>
+</body>
+</html>
