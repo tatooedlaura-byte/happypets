@@ -51,6 +51,7 @@ A gentle responsibility builder for kids ages 5–12. Not a game — a tool that
 - [ ] Child profiles under family account
 - [ ] Each child sees their contributions
 - [ ] Parent approval mode for tasks
+- [ ] Family notifications (remind members if tasks not done by set time)
 
 ### Phase 4: Enhanced Features
 - [ ] Memory wall (photos, sentences, stickers)
