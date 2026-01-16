@@ -1,0 +1,17 @@
+{
+  "name": "Happy Pets",
+  "short_name": "Happy Pets",
+  "description": "Track your pet care tasks with your family",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#FDF8F4",
+  "theme_color": "#7C9FE8",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
