@@ -487,23 +487,8 @@ function getUrlParam(param) {
 // INITIALIZATION
 // ============================================
 
-document.addEventListener('DOMContentLoaded', function() {
-  // Check which page we're on and initialize accordingly
-
-  if (document.getElementById('pet-cards-container')) {
-    // Home page
-    renderPetCards();
-    renderKindnessJar();
-  }
-
-  if (document.getElementById('task-list')) {
-    // Pet detail page
-    const petId = getUrlParam('id');
-    if (petId) {
-      renderPetDetail(petId);
-    }
-  }
-});
+// Note: Page initialization is now handled in each HTML file's inline script
+// to support async Firebase/Firestore operations
 
 // Add celebration styles dynamically
 const celebrationStyles = document.createElement('style');

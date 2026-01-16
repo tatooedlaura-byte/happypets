@@ -86,8 +86,20 @@
 
     async function init() {
       currentPetId = getUrlParam('id');
+      console.log('Pet ID from URL:', currentPetId);
+
+      const family = getCurrentFamily();
+      console.log('Current family:', family);
+
       if (!currentPetId) {
+        alert('No pet ID in URL');
         window.location.href = 'index.html';
+        return;
+      }
+
+      if (!family) {
+        alert('No family logged in');
+        window.location.href = 'login.html';
         return;
       }
 
