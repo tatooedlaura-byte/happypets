@@ -4,25 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Today - Happy Pets</title>
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=6">
   <link rel="stylesheet" href="forms.css?v=3">
 </head>
 <body>
   <div class="app">
-    <!-- Header -->
-    <header class="header">
-      <h1>📅 Today's Tasks</h1>
-      <p class="subtitle" id="today-date"></p>
-    </header>
-
-    <!-- Progress Summary -->
-    <section class="today-summary" id="today-summary">
-      <div class="summary-circle">
-        <span class="summary-count" id="completed-count">0</span>
-        <span class="summary-total">/ <span id="total-count">0</span></span>
+    <!-- Header with Progress -->
+    <header class="header today-header" id="today-summary">
+      <div class="today-header-content">
+        <div class="today-header-left">
+          <h1>📅 Today's Tasks</h1>
+          <p class="subtitle" id="today-date"></p>
+        </div>
+        <div class="today-progress">
+          <span class="progress-count" id="completed-count">0</span>
+          <span class="progress-total">/<span id="total-count">0</span></span>
+          <span class="progress-label">done</span>
+        </div>
       </div>
-      <p class="summary-label">tasks completed</p>
-    </section>
+    </header>
 
     <!-- All Tasks -->
     <main class="today-tasks" id="today-tasks">

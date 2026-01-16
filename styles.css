@@ -456,51 +456,49 @@ body {
 /* TODAY PAGE STYLES */
 /* ============================================ */
 
-.today-summary {
-  text-align: center;
+.today-header {
   padding: 25px 20px;
 }
 
-.summary-circle {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: var(--card);
-  box-shadow: 0 4px 15px var(--shadow);
+.today-header-content {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  margin: 0 auto 10px;
 }
 
-.today-summary.all-done .summary-circle {
-  background: linear-gradient(135deg, var(--accent) 0%, #B8E6C9 100%);
+.today-header-left h1 {
+  margin: 0;
 }
 
-.summary-count {
-  font-size: 36px;
+.today-progress {
+  background: rgba(255,255,255,0.25);
+  border-radius: 16px;
+  padding: 10px 15px;
+  text-align: center;
+  min-width: 70px;
+}
+
+.today-header.all-done .today-progress {
+  background: rgba(255,255,255,0.4);
+}
+
+.progress-count {
+  font-size: 28px;
   font-weight: 700;
-  color: var(--primary);
+  color: white;
   line-height: 1;
 }
 
-.today-summary.all-done .summary-count {
-  color: white;
+.progress-total {
+  font-size: 16px;
+  color: rgba(255,255,255,0.9);
 }
 
-.summary-total {
-  font-size: 18px;
-  color: var(--text-light);
-}
-
-.today-summary.all-done .summary-total {
+.progress-label {
+  display: block;
+  font-size: 11px;
   color: rgba(255,255,255,0.8);
-}
-
-.summary-label {
-  font-size: 14px;
-  color: var(--text-light);
+  margin-top: 2px;
 }
 
 .today-tasks {
