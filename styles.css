@@ -56,6 +56,41 @@ body {
   margin-top: 5px;
 }
 
+/* Current User Badge */
+.current-user-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.25);
+  padding: 6px 14px 6px 8px;
+  border-radius: 20px;
+  margin-top: 12px;
+  text-decoration: none;
+  color: white;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.current-user-badge:hover,
+.current-user-badge:active {
+  background: rgba(255,255,255,0.35);
+}
+
+.current-user-avatar {
+  font-size: 20px;
+  width: 28px;
+  height: 28px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.current-user-name {
+  font-weight: 600;
+}
+
 /* Pet Grid */
 .pet-grid {
   display: grid;

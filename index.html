@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Happy Pets</title>
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
   <div class="app">
@@ -12,6 +12,10 @@
     <header class="header">
       <h1>🐾 Happy Pets</h1>
       <p class="subtitle" id="family-subtitle">Your furry friends need you!</p>
+      <a href="family.html" class="current-user-badge" id="current-user-badge" title="Tap to switch user">
+        <span class="current-user-avatar" id="current-user-avatar">👤</span>
+        <span class="current-user-name" id="current-user-name">Select who you are</span>
+      </a>
     </header>
 
     <!-- Loading State -->
@@ -81,6 +85,9 @@
       if (family) {
         document.getElementById('family-subtitle').textContent = family.name;
       }
+
+      // Show current user
+      updateCurrentUserBadge();
 
       await renderPetCardsAsync();
       await renderKindnessJarAsync();
@@ -163,6 +170,20 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+
+    function updateCurrentUserBadge() {
+      const member = getCurrentMember();
+      const avatarEl = document.getElementById('current-user-avatar');
+      const nameEl = document.getElementById('current-user-name');
+
+      if (member) {
+        avatarEl.textContent = member.avatar;
+        nameEl.textContent = member.name;
+      } else {
+        avatarEl.textContent = '👤';
+        nameEl.textContent = 'Tap to pick yourself';
+      }
     }
   </script>
 </body>
