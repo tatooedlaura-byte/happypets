@@ -122,7 +122,9 @@
 
             petTasksHtml += `
               <button class="task-button ${isComplete ? 'completed' : ''}"
-                      onclick="handleTodayTaskClick('${pet.id}', '${taskId}')">
+                      data-task-id="${taskId}"
+                      data-hint="${escapeHtml(hintText)}"
+                      onclick="handleTodayTaskClick(this, '${pet.id}', '${taskId}')">
                 <div class="task-icon">${legacyTask.icon}</div>
                 <div class="task-content">
                   <div class="task-name">${escapeHtml(legacyTask.name)}</div>
@@ -142,13 +144,16 @@
           const isComplete = await isTaskCompleteInFirestore(pet.id, taskId);
           if (isComplete) completedTasks++;
 
+          const hint = taskData.details || 'Tap when done!';
           petTasksHtml += `
             <button class="task-button ${isComplete ? 'completed' : ''}"
-                    onclick="handleTodayTaskClick('${pet.id}', '${taskId}')">
+                    data-task-id="${taskId}"
+                    data-hint="${escapeHtml(hint)}"
+                    onclick="handleTodayTaskClick(this, '${pet.id}', '${taskId}')">
               <div class="task-icon">${taskData.icon}</div>
               <div class="task-content">
                 <div class="task-name">${escapeHtml(taskData.name)}</div>
-                <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(taskData.details || 'Tap when done!')}</div>
+                <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(hint)}</div>
               </div>
               <div class="task-check">${isComplete ? '✓' : ''}</div>
             </button>
@@ -193,13 +198,56 @@
       }
     }
 
-    // Handle task click from Today view
-    async function handleTodayTaskClick(petId, taskId) {
-      const isNowComplete = await toggleTaskInFirestore(petId, taskId);
-      await renderTodayTasksAsync();
+    // Handle task click from Today view - optimistic UI update
+    async function handleTodayTaskClick(buttonEl, petId, taskId) {
+      const wasComplete = buttonEl.classList.contains('completed');
+      const isNowComplete = !wasComplete;
+
+      // Toggle visual state immediately
+      buttonEl.classList.toggle('completed');
+      const timeEl = buttonEl.querySelector('.task-time');
+      const checkEl = buttonEl.querySelector('.task-check');
+      const hint = buttonEl.dataset.hint;
+
       if (isNowComplete) {
+        timeEl.textContent = 'Done! ✨';
+        checkEl.textContent = '✓';
         showCelebration();
+      } else {
+        timeEl.textContent = hint;
+        checkEl.textContent = '';
       }
+
+      // Update counter immediately
+      const completedEl = document.getElementById('completed-count');
+      const totalEl = document.getElementById('total-count');
+      let completed = parseInt(completedEl.textContent);
+      const total = parseInt(totalEl.textContent);
+
+      if (isNowComplete) {
+        completed++;
+      } else {
+        completed--;
+      }
+      completedEl.textContent = completed;
+
+      // Update header color
+      const summaryEl = document.getElementById('today-summary');
+      if (total > 0 && completed === total) {
+        summaryEl.classList.add('all-done');
+      } else {
+        summaryEl.classList.remove('all-done');
+      }
+
+      // Save to Firestore in background
+      toggleTaskInFirestore(petId, taskId).catch(err => {
+        console.error('Error saving task:', err);
+        // Revert on error
+        buttonEl.classList.toggle('completed');
+        timeEl.textContent = wasComplete ? 'Done! ✨' : hint;
+        checkEl.textContent = wasComplete ? '✓' : '';
+        completedEl.textContent = wasComplete ? completed + 1 : completed - 1;
+      });
     }
 
     function escapeHtml(text) {

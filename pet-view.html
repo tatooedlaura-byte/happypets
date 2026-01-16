@@ -188,7 +188,9 @@
 
           html += `
             <button class="task-button ${isComplete ? 'completed' : ''}"
-                    onclick="handleTaskClick('${pet.id}', '${taskId}')">
+                    data-task-id="${taskId}"
+                    data-hint="${escapeHtml(hintText)}"
+                    onclick="handleTaskClick(this, '${pet.id}', '${taskId}')">
               <div class="task-icon">${legacyTask.icon}</div>
               <div class="task-content">
                 <div class="task-name">${escapeHtml(legacyTask.name)}</div>
@@ -210,13 +212,16 @@
         // New format: task data from customTasks
         const isComplete = await isTaskCompleteInFirestore(pet.id, taskId);
 
+        const hint = taskData.details || 'Tap when done!';
         html += `
           <button class="task-button ${isComplete ? 'completed' : ''}"
-                  onclick="handleTaskClick('${pet.id}', '${taskId}')">
+                  data-task-id="${taskId}"
+                  data-hint="${escapeHtml(hint)}"
+                  onclick="handleTaskClick(this, '${pet.id}', '${taskId}')">
             <div class="task-icon">${taskData.icon}</div>
             <div class="task-content">
               <div class="task-name">${escapeHtml(taskData.name)}</div>
-              <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(taskData.details || 'Tap when done!')}</div>
+              <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(hint)}</div>
             </div>
             <div class="task-check">${isComplete ? '✓' : ''}</div>
           </button>
@@ -230,19 +235,34 @@
       container.innerHTML = html;
     }
 
-    async function handleTaskClick(petId, taskId) {
-      const isNowComplete = await toggleTaskInFirestore(petId, taskId);
+    async function handleTaskClick(buttonEl, petId, taskId) {
+      // Optimistic UI update - instant feedback
+      const wasComplete = buttonEl.classList.contains('completed');
+      const isNowComplete = !wasComplete;
 
-      // Re-render tasks
-      const pet = await getPetFromFirestore(petId);
-      if (pet) {
-        await renderTasksAsync(pet);
-      }
+      // Toggle visual state immediately
+      buttonEl.classList.toggle('completed');
+      const timeEl = buttonEl.querySelector('.task-time');
+      const checkEl = buttonEl.querySelector('.task-check');
+      const hint = buttonEl.dataset.hint;
 
-      // Show a little celebration if completed
       if (isNowComplete) {
+        timeEl.textContent = 'Done! ✨';
+        checkEl.textContent = '✓';
         showCelebration();
+      } else {
+        timeEl.textContent = hint;
+        checkEl.textContent = '';
       }
+
+      // Save to Firestore in background (don't wait)
+      toggleTaskInFirestore(petId, taskId).catch(err => {
+        console.error('Error saving task:', err);
+        // Revert on error
+        buttonEl.classList.toggle('completed');
+        timeEl.textContent = wasComplete ? 'Done! ✨' : hint;
+        checkEl.textContent = wasComplete ? '✓' : '';
+      });
     }
 
     function renderFunFact(petType) {
