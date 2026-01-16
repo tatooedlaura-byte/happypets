@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pet Care - Happy Pets</title>
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
   <div class="app">
@@ -20,7 +20,9 @@
     <section class="tasks-section">
       <h2>📋 Today's Care</h2>
       <div class="task-list" id="task-list">
-        <!-- Tasks rendered by JavaScript -->
+        <div class="loading-state">
+          <p>Loading tasks...</p>
+        </div>
       </div>
     </section>
 
@@ -40,7 +42,7 @@
         <div class="quick-action-icon">📝</div>
         <div class="quick-action-label">Edit Pet</div>
       </a>
-      <a href="#" class="quick-action" onclick="handleDeletePet(getUrlParam('id')); return false;">
+      <a href="#" class="quick-action" id="delete-link">
         <div class="quick-action-icon">🗑️</div>
         <div class="quick-action-label">Remove Pet</div>
       </a>
@@ -60,22 +62,191 @@
         <span class="nav-icon">📸</span>
         <span class="nav-label">Memories</span>
       </a>
-      <a href="#" class="nav-item">
+      <a href="family.html" class="nav-item">
         <span class="nav-icon">👨‍👩‍👧</span>
         <span class="nav-label">Family</span>
       </a>
     </nav>
   </div>
 
-  <script src="app.js?v=3"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="app.js?v=7"></script>
   <script>
-    // Set edit link URL after page loads
-    document.addEventListener('DOMContentLoaded', function() {
-      const petId = getUrlParam('id');
-      if (petId) {
-        document.getElementById('edit-link').href = `edit-pet.html?id=${petId}`;
+    let currentPetId = null;
+
+    // Check auth
+    if (!requireAuth()) {
+      // Redirect handled by requireAuth
+    } else {
+      init();
+    }
+
+    async function init() {
+      currentPetId = getUrlParam('id');
+      if (!currentPetId) {
+        window.location.href = 'index.html';
+        return;
       }
-    });
+
+      // Set up edit link
+      document.getElementById('edit-link').href = `edit-pet.html?id=${currentPetId}`;
+
+      // Set up delete handler
+      document.getElementById('delete-link').addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (confirm('Are you sure you want to remove this pet?')) {
+          await deletePetFromFirestore(currentPetId);
+          window.location.href = 'index.html';
+        }
+      });
+
+      await renderPetDetailAsync();
+    }
+
+    async function renderPetDetailAsync() {
+      const pet = await getPetFromFirestore(currentPetId);
+      if (!pet) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const config = PET_CONFIG[pet.type] || PET_CONFIG.dog;
+
+      // Update header
+      const header = document.querySelector('.pet-header');
+      if (header) {
+        header.style.background = `linear-gradient(135deg, ${config.color} 0%, ${lightenColor(config.color)} 100%)`;
+      }
+
+      const avatarEl = document.getElementById('pet-avatar');
+      const nameEl = document.getElementById('pet-name');
+      const typeEl = document.getElementById('pet-type');
+
+      if (avatarEl) avatarEl.textContent = config.emoji;
+      if (nameEl) nameEl.textContent = pet.name;
+      if (typeEl) typeEl.textContent = pet.breed || config.name;
+
+      // Render tasks
+      await renderTasksAsync(pet);
+
+      // Render fun fact
+      renderFunFact(pet.type);
+    }
+
+    async function renderTasksAsync(pet) {
+      const container = document.getElementById('task-list');
+      if (!container) return;
+
+      let html = '';
+      const customTasks = pet.customTasks || [];
+
+      // If no tasks array, nothing to show
+      if (!pet.tasks || pet.tasks.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:#7A7A7A;padding:20px;">No tasks set up yet. Tap Edit Pet to add some!</p>';
+        return;
+      }
+
+      let tasksShown = 0;
+
+      for (const taskId of pet.tasks) {
+        // Find task in customTasks array (new format)
+        const taskData = customTasks.find(ct => ct.id === taskId);
+
+        if (!taskData) {
+          // Legacy support: check old TASK_CONFIG (always show daily)
+          const legacyTask = TASK_CONFIG[taskId];
+          if (!legacyTask) continue;
+
+          tasksShown++;
+          const isComplete = await isTaskCompleteInFirestore(pet.id, taskId);
+          const hintText = (pet.taskHints && pet.taskHints[taskId]) || legacyTask.time;
+
+          html += `
+            <button class="task-button ${isComplete ? 'completed' : ''}"
+                    onclick="handleTaskClick('${pet.id}', '${taskId}')">
+              <div class="task-icon">${legacyTask.icon}</div>
+              <div class="task-content">
+                <div class="task-name">${escapeHtml(legacyTask.name)}</div>
+                <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(hintText)}</div>
+              </div>
+              <div class="task-check">${isComplete ? '✓' : ''}</div>
+            </button>
+          `;
+          continue;
+        }
+
+        // Check if task should show today
+        if (!shouldShowTaskToday(taskData)) {
+          continue;
+        }
+
+        tasksShown++;
+
+        // New format: task data from customTasks
+        const isComplete = await isTaskCompleteInFirestore(pet.id, taskId);
+
+        html += `
+          <button class="task-button ${isComplete ? 'completed' : ''}"
+                  onclick="handleTaskClick('${pet.id}', '${taskId}')">
+            <div class="task-icon">${taskData.icon}</div>
+            <div class="task-content">
+              <div class="task-name">${escapeHtml(taskData.name)}</div>
+              <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(taskData.details || 'Tap when done!')}</div>
+            </div>
+            <div class="task-check">${isComplete ? '✓' : ''}</div>
+          </button>
+        `;
+      }
+
+      if (tasksShown === 0) {
+        html = '<p style="text-align:center;color:#7A7A7A;padding:20px;">No tasks scheduled for today! 🎉</p>';
+      }
+
+      container.innerHTML = html;
+    }
+
+    async function handleTaskClick(petId, taskId) {
+      const isNowComplete = await toggleTaskInFirestore(petId, taskId);
+
+      // Re-render tasks
+      const pet = await getPetFromFirestore(petId);
+      if (pet) {
+        await renderTasksAsync(pet);
+      }
+
+      // Show a little celebration if completed
+      if (isNowComplete) {
+        showCelebration();
+      }
+    }
+
+    function renderFunFact(petType) {
+      const container = document.getElementById('fun-fact-text');
+      if (!container) return;
+
+      const facts = FUN_FACTS[petType] || FUN_FACTS.dog;
+      const randomFact = facts[Math.floor(Math.random() * facts.length)];
+
+      container.innerHTML = `<strong>Did you know?</strong><br>${randomFact}`;
+    }
+
+    function getUrlParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function lightenColor(hex) {
+      return hex + '99';
+    }
   </script>
 </body>
 </html>

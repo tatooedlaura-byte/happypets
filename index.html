@@ -4,28 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Happy Pets</title>
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
   <div class="app">
     <!-- Header -->
     <header class="header">
       <h1>🐾 Happy Pets</h1>
-      <p class="subtitle">Your furry friends need you!</p>
+      <p class="subtitle" id="family-subtitle">Your furry friends need you!</p>
     </header>
 
+    <!-- Loading State -->
+    <div id="loading-state" class="loading-state">
+      <p>Loading your pets...</p>
+    </div>
+
     <!-- Pet Cards (rendered dynamically) -->
-    <main class="pet-grid" id="pet-cards-container">
+    <main class="pet-grid" id="pet-cards-container" style="display: none;">
       <!-- Pets will be loaded here by JavaScript -->
-      <a href="add-pet.html" class="pet-card add-pet">
-        <div class="pet-avatar add">+</div>
-        <h2 class="pet-name">Add Pet</h2>
-        <p class="pet-type">Tap to add a new friend</p>
-      </a>
     </main>
 
     <!-- Kindness Jar -->
-    <section class="kindness-section">
+    <section class="kindness-section" id="kindness-section" style="display: none;">
       <h2>Your Kindness Jar</h2>
       <div class="kindness-jar">
         <div class="jar-container">
@@ -56,13 +56,107 @@
         <span class="nav-icon">📸</span>
         <span class="nav-label">Memories</span>
       </a>
-      <a href="#" class="nav-item">
+      <a href="family.html" class="nav-item">
         <span class="nav-icon">👨‍👩‍👧</span>
         <span class="nav-label">Family</span>
       </a>
     </nav>
   </div>
 
-  <script src="app.js?v=3"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="app.js?v=7"></script>
+  <script>
+    // Check auth
+    if (!requireAuth()) {
+      // Redirect handled by requireAuth
+    } else {
+      initHomePage();
+    }
+
+    async function initHomePage() {
+      const family = getCurrentFamily();
+      if (family) {
+        document.getElementById('family-subtitle').textContent = family.name;
+      }
+
+      await renderPetCardsAsync();
+      await renderKindnessJarAsync();
+
+      // Show content, hide loading
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('pet-cards-container').style.display = 'grid';
+      document.getElementById('kindness-section').style.display = 'block';
+    }
+
+    async function renderPetCardsAsync() {
+      const container = document.getElementById('pet-cards-container');
+      const pets = await getPetsFromFirestore();
+
+      let html = '';
+
+      for (const pet of pets) {
+        const config = PET_CONFIG[pet.type] || PET_CONFIG.dog;
+        const completedTasks = await getCompletedTasksForPetFromFirestore(pet.id);
+        const totalTasks = pet.tasks ? pet.tasks.length : 0;
+        const allDone = completedTasks >= totalTasks && totalTasks > 0;
+
+        html += `
+          <a href="pet-view.html?id=${pet.id}" class="pet-card">
+            <div class="pet-avatar" style="background: ${config.color}">${config.emoji}</div>
+            <h2 class="pet-name">${escapeHtml(pet.name)}</h2>
+            <p class="pet-type">${pet.breed || config.name}</p>
+            <div class="pet-status">
+              <span class="status-dot ${allDone ? 'done' : 'pending'}"></span>
+              <span>${completedTasks} of ${totalTasks} done</span>
+            </div>
+          </a>
+        `;
+      }
+
+      // Add Pet card
+      html += `
+        <a href="add-pet.html" class="pet-card add-pet">
+          <div class="pet-avatar add">+</div>
+          <h2 class="pet-name">Add Pet</h2>
+          <p class="pet-type">Tap to add a new friend</p>
+        </a>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    async function renderKindnessJarAsync() {
+      const jarFill = document.getElementById('jar-fill');
+      const jarMessage = document.getElementById('jar-message');
+      if (!jarFill) return;
+
+      const kindness = await getKindnessFromFirestore();
+      const level = getKindnessLevel(kindness);
+
+      jarFill.style.height = level + '%';
+
+      // Update message based on level
+      if (jarMessage) {
+        if (level < 25) {
+          jarMessage.textContent = "Let's help our pets today!";
+        } else if (level < 50) {
+          jarMessage.textContent = "You're doing great!";
+        } else if (level < 75) {
+          jarMessage.textContent = "So much kindness!";
+        } else {
+          jarMessage.textContent = "Amazing helper!";
+        }
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
 </body>
 </html>

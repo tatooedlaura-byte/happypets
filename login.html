@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Happy Pets</title>
+  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="forms.css?v=4">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <h1>🐾 Happy Pets</h1>
+      <p class="subtitle">Welcome back!</p>
+    </header>
+
+    <!-- Login Form -->
+    <form id="login-form" class="form-section auth-form">
+      <div class="form-group">
+        <label for="username">Family Username</label>
+        <input type="text" id="username" placeholder="e.g., smithfamily" required autocapitalize="none" autocorrect="off">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" required>
+      </div>
+
+      <div id="error-message" class="error-message" style="display: none;"></div>
+
+      <button type="submit" class="submit-button" id="login-btn">
+        <span>Log In</span>
+        <span class="button-icon">→</span>
+      </button>
+
+      <div class="auth-switch">
+        <p>New to Happy Pets?</p>
+        <a href="signup.html" class="auth-link">Create a Family Account</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    // Check if already logged in
+    const family = getCurrentFamily();
+    if (family) {
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const errorDiv = document.getElementById('error-message');
+      const loginBtn = document.getElementById('login-btn');
+
+      errorDiv.style.display = 'none';
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<span>Logging in...</span>';
+
+      try {
+        await login(username, password);
+
+        // Check if family has members
+        const members = await getMembers();
+        if (members.length === 0) {
+          // No members yet, go to family setup
+          window.location.href = 'family.html';
+        } else {
+          // Has members, go to member selection or home
+          window.location.href = 'index.html';
+        }
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<span>Log In</span><span class="button-icon">→</span>';
+      }
+    });
+  </script>
+</body>
+</html>

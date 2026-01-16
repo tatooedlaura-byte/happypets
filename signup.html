@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Happy Pets</title>
+  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="forms.css?v=4">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <h1>🐾 Happy Pets</h1>
+      <p class="subtitle">Create your family account</p>
+    </header>
+
+    <!-- Signup Form -->
+    <form id="signup-form" class="form-section auth-form">
+      <div class="form-group">
+        <label for="family-name">Family Name</label>
+        <input type="text" id="family-name" placeholder="e.g., The Smith Family" required>
+      </div>
+
+      <div class="form-group">
+        <label for="username">Choose a Username</label>
+        <input type="text" id="username" placeholder="e.g., smithfamily" required autocapitalize="none" autocorrect="off">
+        <p class="form-hint">This is what you'll use to log in</p>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Create a Password</label>
+        <input type="password" id="password" placeholder="Choose a password" required minlength="4">
+      </div>
+
+      <div class="form-group">
+        <label for="confirm-password">Confirm Password</label>
+        <input type="password" id="confirm-password" placeholder="Type it again" required>
+      </div>
+
+      <div id="error-message" class="error-message" style="display: none;"></div>
+
+      <button type="submit" class="submit-button" id="signup-btn">
+        <span>Create Account</span>
+        <span class="button-icon">🎉</span>
+      </button>
+
+      <div class="auth-switch">
+        <p>Already have an account?</p>
+        <a href="login.html" class="auth-link">Log In</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    // Check if already logged in
+    const family = getCurrentFamily();
+    if (family) {
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('signup-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const familyName = document.getElementById('family-name').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      const errorDiv = document.getElementById('error-message');
+      const signupBtn = document.getElementById('signup-btn');
+
+      errorDiv.style.display = 'none';
+
+      // Validation
+      if (password !== confirmPassword) {
+        errorDiv.textContent = 'Passwords do not match';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      if (username.length < 3) {
+        errorDiv.textContent = 'Username must be at least 3 characters';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      signupBtn.disabled = true;
+      signupBtn.innerHTML = '<span>Creating account...</span>';
+
+      try {
+        await signUp(username, password, familyName);
+        // Go to family setup to add members
+        window.location.href = 'family.html';
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+        signupBtn.disabled = false;
+        signupBtn.innerHTML = '<span>Create Account</span><span class="button-icon">🎉</span>';
+      }
+    });
+  </script>
+</body>
+</html>

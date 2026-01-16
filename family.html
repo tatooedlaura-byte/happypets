@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family - Happy Pets</title>
+  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="forms.css?v=4">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <h1>👨‍👩‍👧 Family</h1>
+      <p class="subtitle" id="family-name">Loading...</p>
+    </header>
+
+    <!-- Current Member Selection -->
+    <section class="member-selection" id="member-selection">
+      <h2>Who's using the app?</h2>
+      <div class="member-grid" id="member-grid">
+        <!-- Members rendered here -->
+      </div>
+    </section>
+
+    <!-- Add Member Section -->
+    <section class="add-member-section">
+      <button type="button" class="add-member-btn" onclick="openAddMemberForm()">
+        <span class="add-icon">+</span>
+        <span>Add Family Member</span>
+      </button>
+    </section>
+
+    <!-- Add Member Form (hidden by default) -->
+    <div id="member-form-popup" class="member-form-popup" style="display: none;">
+      <form id="add-member-form" class="form-section">
+        <h3 id="form-title">Add Family Member</h3>
+
+        <div class="form-group">
+          <label for="member-name">Name</label>
+          <input type="text" id="member-name" placeholder="e.g., Emma" required>
+        </div>
+
+        <div class="form-group">
+          <label>Choose an Avatar</label>
+          <div class="avatar-grid" id="avatar-grid">
+            <label class="avatar-option">
+              <input type="radio" name="avatar" value="👨" required>
+              <span class="avatar-icon">👨</span>
+            </label>
+            <label class="avatar-option">
+              <input type="radio" name="avatar" value="👩">
+              <span class="avatar-icon">👩</span>
+            </label>
+            <label class="avatar-option">
+              <input type="radio" name="avatar" value="👦">
+              <span class="avatar-icon">👦</span>
+            </label>
+            <label class="avatar-option">
+              <input type="radio" name="avatar" value="👧">
+              <span class="avatar-icon">👧</span>
+            </label>
+            <label class="avatar-option">
+              <input type="radio" name="avatar" value="🧑">
+              <span class="avatar-icon">🧑</span>
+            </label>
+            <label class="avatar-option">
+              <input type="radio" name="avatar" value="👶">
+              <span class="avatar-icon">👶</span>
+            </label>
+            <label class="avatar-option">
+              <input type="radio" name="avatar" value="🧓">
+              <span class="avatar-icon">🧓</span>
+            </label>
+            <label class="avatar-option">
+              <input type="radio" name="avatar" value="👴">
+              <span class="avatar-icon">👴</span>
+            </label>
+            <label class="avatar-option">
+              <input type="radio" name="avatar" value="👵">
+              <span class="avatar-icon">👵</span>
+            </label>
+            <label class="avatar-option">
+              <input type="radio" name="avatar" value="🤠">
+              <span class="avatar-icon">🤠</span>
+            </label>
+            <label class="avatar-option">
+              <input type="radio" name="avatar" value="🦸">
+              <span class="avatar-icon">🦸</span>
+            </label>
+            <label class="avatar-option">
+              <input type="radio" name="avatar" value="🧙">
+              <span class="avatar-icon">🧙</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Pick a Color</label>
+          <div class="color-grid">
+            <label class="color-option">
+              <input type="radio" name="color" value="#7C9FE8" checked>
+              <span class="color-swatch" style="background: #7C9FE8;"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="color" value="#F8B4C4">
+              <span class="color-swatch" style="background: #F8B4C4;"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="color" value="#95D5B2">
+              <span class="color-swatch" style="background: #95D5B2;"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="color" value="#FFE5A0">
+              <span class="color-swatch" style="background: #FFE5A0;"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="color" value="#E8D4F1">
+              <span class="color-swatch" style="background: #E8D4F1;"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="color" value="#FFD4A0">
+              <span class="color-swatch" style="background: #FFD4A0;"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-buttons">
+          <button type="button" class="cancel-btn" onclick="closeMemberForm()">Cancel</button>
+          <button type="submit" class="submit-button">
+            <span id="submit-text">Add Member</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Logout Button -->
+    <div class="logout-section">
+      <button type="button" class="logout-btn" onclick="logout()">
+        Log Out
+      </button>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </a>
+      <a href="today.html" class="nav-item">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">Today</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">📸</span>
+        <span class="nav-label">Memories</span>
+      </a>
+      <a href="family.html" class="nav-item active">
+        <span class="nav-icon">👨‍👩‍👧</span>
+        <span class="nav-label">Family</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    let editingMemberId = null;
+
+    // Check auth
+    if (!requireAuth()) {
+      // Redirect handled by requireAuth
+    }
+
+    async function init() {
+      const family = getCurrentFamily();
+      if (family) {
+        document.getElementById('family-name').textContent = family.name;
+      }
+      await renderMembers();
+    }
+
+    async function renderMembers() {
+      const members = await getMembers();
+      const grid = document.getElementById('member-grid');
+      const currentMember = getCurrentMember();
+
+      if (members.length === 0) {
+        grid.innerHTML = '<p class="no-members">Add family members to get started!</p>';
+        return;
+      }
+
+      let html = '';
+      members.forEach(member => {
+        const isSelected = currentMember && currentMember.id === member.id;
+        html += `
+          <div class="member-card ${isSelected ? 'selected' : ''}" onclick="selectMember('${member.id}', '${member.name}', '${member.avatar}')">
+            <div class="member-avatar" style="background: ${member.color}">${member.avatar}</div>
+            <div class="member-name">${escapeHtml(member.name)}</div>
+            ${isSelected ? '<div class="member-check">✓</div>' : ''}
+            <button class="member-edit-btn" onclick="event.stopPropagation(); editMember('${member.id}', '${escapeHtml(member.name)}', '${member.avatar}', '${member.color}')">✎</button>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = html;
+    }
+
+    function selectMember(memberId, memberName, memberAvatar) {
+      setCurrentMember(memberId, memberName, memberAvatar);
+      renderMembers();
+    }
+
+    function openAddMemberForm() {
+      editingMemberId = null;
+      document.getElementById('form-title').textContent = 'Add Family Member';
+      document.getElementById('submit-text').textContent = 'Add Member';
+      document.getElementById('member-name').value = '';
+      document.querySelectorAll('input[name="avatar"]').forEach(r => r.checked = false);
+      document.querySelector('input[name="color"][value="#7C9FE8"]').checked = true;
+      document.getElementById('member-form-popup').style.display = 'block';
+    }
+
+    function editMember(memberId, name, avatar, color) {
+      editingMemberId = memberId;
+      document.getElementById('form-title').textContent = 'Edit Family Member';
+      document.getElementById('submit-text').textContent = 'Save Changes';
+      document.getElementById('member-name').value = name;
+
+      // Select avatar
+      const avatarRadio = document.querySelector(`input[name="avatar"][value="${avatar}"]`);
+      if (avatarRadio) avatarRadio.checked = true;
+
+      // Select color
+      const colorRadio = document.querySelector(`input[name="color"][value="${color}"]`);
+      if (colorRadio) colorRadio.checked = true;
+
+      document.getElementById('member-form-popup').style.display = 'block';
+    }
+
+    function closeMemberForm() {
+      document.getElementById('member-form-popup').style.display = 'none';
+      editingMemberId = null;
+    }
+
+    document.getElementById('add-member-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('member-name').value.trim();
+      const avatar = document.querySelector('input[name="avatar"]:checked')?.value || '👤';
+      const color = document.querySelector('input[name="color"]:checked')?.value || '#7C9FE8';
+
+      try {
+        if (editingMemberId) {
+          await updateMember(editingMemberId, { name, avatar, color });
+        } else {
+          await addMember(name, avatar, color);
+        }
+        closeMemberForm();
+        await renderMembers();
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    init();
+  </script>
+</body>
+</html>

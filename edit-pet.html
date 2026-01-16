@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Pet - Happy Pets</title>
-  <link rel="stylesheet" href="styles.css?v=12">
-  <link rel="stylesheet" href="forms.css?v=12">
+  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="forms.css?v=4">
 </head>
 <body>
   <div class="app">
@@ -177,19 +177,30 @@
         <span class="nav-icon">📸</span>
         <span class="nav-label">Memories</span>
       </a>
-      <a href="#" class="nav-item">
+      <a href="family.html" class="nav-item">
         <span class="nav-icon">👨‍👩‍👧</span>
         <span class="nav-label">Family</span>
       </a>
     </nav>
   </div>
 
-  <script src="app.js?v=12"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="app.js?v=7"></script>
   <script>
     // Collapsible sections
     function toggleSection(button) {
       const section = button.closest('.collapsible-section');
       section.classList.toggle('open');
+    }
+
+    // Check auth
+    if (!requireAuth()) {
+      // Redirect handled by requireAuth
+    } else {
+      initAsync();
     }
 
     let currentPetId = null;
@@ -198,14 +209,14 @@
     let currentFormType = '';
     let editingTaskId = null; // Track if we're editing an existing task
 
-    function init() {
+    async function initAsync() {
       currentPetId = getUrlParam('id');
       if (!currentPetId) {
         window.location.href = 'index.html';
         return;
       }
 
-      const pet = getPet(currentPetId);
+      const pet = await getPetFromFirestore(currentPetId);
       if (!pet) {
         window.location.href = 'index.html';
         return;
@@ -439,15 +450,19 @@
     // FORM SUBMISSION
     // ============================================
 
-    function confirmDelete() {
+    async function confirmDelete() {
       if (confirm('Are you sure you want to remove this pet? This cannot be undone.')) {
-        deletePet(currentPetId);
+        await deletePetFromFirestore(currentPetId);
         window.location.href = 'index.html';
       }
     }
 
-    document.getElementById('edit-pet-form').addEventListener('submit', function(e) {
+    document.getElementById('edit-pet-form').addEventListener('submit', async function(e) {
       e.preventDefault();
+
+      const submitBtn = document.querySelector('.submit-button');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Saving...</span>';
 
       const name = document.getElementById('pet-name').value.trim();
       const breed = document.getElementById('pet-breed').value.trim();
@@ -455,19 +470,22 @@
       // Build task IDs array from tasks
       const taskIds = tasks.map(t => t.id);
 
-      // Update pet - store all task data in customTasks
-      updatePet(currentPetId, {
-        name,
-        breed,
-        tasks: taskIds,
-        customTasks: tasks
-      });
+      try {
+        // Update pet - store all task data in customTasks
+        await updatePetInFirestore(currentPetId, {
+          name,
+          breed,
+          tasks: taskIds,
+          customTasks: tasks
+        });
 
-      window.location.href = `pet-view.html?id=${currentPetId}`;
+        window.location.href = `pet-view.html?id=${currentPetId}`;
+      } catch (error) {
+        alert('Error saving: ' + error.message);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Save Changes</span><span class="button-icon">✓</span>';
+      }
     });
-
-    // Initialize on load
-    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>

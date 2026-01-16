@@ -793,3 +793,333 @@
   background: #F8B4C4;
   color: white;
 }
+
+/* ============================================ */
+/* AUTH PAGES (Login/Signup) */
+/* ============================================ */
+
+.auth-form {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="password"] {
+  width: 100%;
+  padding: 15px 18px;
+  font-size: 16px;
+  border: 2px solid var(--primary-light);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(124, 159, 232, 0.2);
+}
+
+.error-message {
+  background: #FFF0F3;
+  border: 1px solid #F8B4C4;
+  color: #E88A9E;
+  padding: 12px 15px;
+  border-radius: 10px;
+  font-size: 14px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid var(--primary-light);
+}
+
+.auth-switch p {
+  color: var(--text-light);
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.auth-link {
+  color: var(--primary);
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+/* ============================================ */
+/* FAMILY PAGE */
+/* ============================================ */
+
+.member-selection {
+  padding: 20px;
+}
+
+.member-selection h2 {
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.member-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.member-card {
+  background: var(--card);
+  border: 2px solid var(--primary-light);
+  border-radius: 16px;
+  padding: 20px 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.member-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.member-card.selected {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, rgba(149, 213, 178, 0.1) 0%, rgba(149, 213, 178, 0.05) 100%);
+}
+
+.member-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin: 0 auto 10px;
+}
+
+.member-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.member-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  background: var(--accent);
+  border-radius: 50%;
+  color: white;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.member-edit-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 28px;
+  height: 28px;
+  background: var(--primary-light);
+  border: none;
+  border-radius: 50%;
+  color: var(--primary);
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.member-card:hover .member-edit-btn {
+  opacity: 1;
+}
+
+.no-members {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-light);
+  padding: 30px;
+}
+
+.add-member-section {
+  padding: 0 20px 20px;
+}
+
+.add-member-btn {
+  width: 100%;
+  padding: 18px;
+  background: var(--card);
+  border: 2px dashed var(--primary-light);
+  border-radius: 16px;
+  color: var(--primary);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s;
+}
+
+.add-member-btn:hover {
+  border-color: var(--primary);
+  background: rgba(124, 159, 232, 0.05);
+}
+
+.add-icon {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Member Form Popup */
+.member-form-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.member-form-popup .form-section {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 25px;
+  max-width: 400px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.member-form-popup h3 {
+  font-size: 20px;
+  color: var(--text);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Avatar Grid */
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.avatar-option input {
+  display: none;
+}
+
+.avatar-icon {
+  display: flex;
+  width: 45px;
+  height: 45px;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: var(--background);
+  border: 2px solid var(--primary-light);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.avatar-option input:checked + .avatar-icon {
+  border-color: var(--primary);
+  background: rgba(124, 159, 232, 0.2);
+  transform: scale(1.1);
+}
+
+/* Color Grid */
+.color-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.color-option input {
+  display: none;
+}
+
+.color-swatch {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.color-option input:checked + .color-swatch {
+  border-color: var(--text);
+  transform: scale(1.15);
+}
+
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancel-btn {
+  flex: 1;
+  padding: 15px;
+  background: transparent;
+  border: 2px solid var(--text-light);
+  border-radius: 12px;
+  color: var(--text-light);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
+
+/* Logout Section */
+.logout-section {
+  padding: 20px;
+  padding-bottom: 100px;
+}
+
+.logout-btn {
+  width: 100%;
+  padding: 15px;
+  background: transparent;
+  border: 2px solid #F8B4C4;
+  border-radius: 12px;
+  color: #E88A9E;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: #FFF0F3;
+}
