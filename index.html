@@ -93,7 +93,14 @@
 
     async function renderPetCardsAsync() {
       const container = document.getElementById('pet-cards-container');
-      const pets = await getPetsFromFirestore();
+      let pets;
+      try {
+        pets = await getPetsFromFirestore();
+        console.log('Loaded pets:', pets);
+      } catch (error) {
+        console.error('Error loading pets:', error);
+        pets = [];
+      }
 
       let html = '';
 

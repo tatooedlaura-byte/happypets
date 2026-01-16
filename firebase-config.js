@@ -139,7 +139,6 @@ async function getMembers() {
   const snapshot = await db.collection('families')
     .doc(family.id)
     .collection('members')
-    .orderBy('createdAt')
     .get();
 
   return snapshot.docs.map(doc => ({
@@ -199,7 +198,6 @@ async function getPetsFromFirestore() {
   const snapshot = await db.collection('families')
     .doc(family.id)
     .collection('pets')
-    .orderBy('createdAt')
     .get();
 
   return snapshot.docs.map(doc => ({
