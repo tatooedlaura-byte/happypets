@@ -3,28 +3,248 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Today - Happy Pets</title>
+  <title>Happy Pets</title>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="styles.css?v=22">
-  <link rel="stylesheet" href="forms.css?v=22">
   <style>
-    .pick-user-overlay {
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F0EB;
+      --card: #FFFFFF;
+      --primary: #7C9FE8;
+      --accent: #95D5B2;
+      --text: #4A4A4A;
+      --text-light: #8A8A8A;
+      --shadow: rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 30px;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, #B8D4F1 100%);
+      padding: 20px;
+      padding-top: 50px;
+      color: white;
+      position: relative;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .app-title {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .settings-btn {
+      width: 44px;
+      height: 44px;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 12px;
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .user-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.2);
+      padding: 12px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .user-avatar {
+      font-size: 28px;
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-greeting {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .user-name {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .user-change {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    /* Main content */
+    .main {
+      padding: 20px;
+    }
+
+    .date-line {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* Pet sections */
+    .pet-section {
+      margin-bottom: 25px;
+    }
+
+    .pet-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .pet-avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .pet-name {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    /* Task list */
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card);
+      padding: 14px 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
+      cursor: pointer;
+      border: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      transition: transform 0.1s;
+    }
+
+    .task-item:active {
+      transform: scale(0.98);
+    }
+
+    .task-icon {
+      font-size: 24px;
+      width: 36px;
+      text-align: center;
+    }
+
+    .task-info {
+      flex: 1;
+    }
+
+    .task-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .task-detail {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .task-check {
+      width: 28px;
+      height: 28px;
+      border: 2px solid #ddd;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: white;
+      transition: all 0.2s;
+    }
+
+    .task-item.done .task-check {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .task-item.done .task-name {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+
+    .done-by {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* Empty / Loading states */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-light);
+    }
+
+    .empty-state p {
+      margin-bottom: 15px;
+    }
+
+    .empty-state a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    /* Pick user modal */
+    .modal-overlay {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.6);
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: 100;
       padding: 20px;
     }
-    .pick-user-modal {
+
+    .modal {
       background: var(--card);
       border-radius: 20px;
       padding: 30px;
@@ -32,206 +252,206 @@
       width: 100%;
       text-align: center;
     }
-    .pick-user-modal h2 {
-      font-size: 24px;
-      margin-bottom: 10px;
-      color: var(--text);
+
+    .modal h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
     }
-    .pick-user-modal p {
+
+    .modal p {
       color: var(--text-light);
       margin-bottom: 20px;
       font-size: 15px;
     }
-    .pick-user-modal select {
-      width: 100%;
-      padding: 15px;
-      font-size: 18px;
-      border: 2px solid var(--primary);
-      border-radius: 12px;
-      background: var(--background);
-      color: var(--text);
-      margin-bottom: 15px;
+
+    .user-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
-    .pick-user-modal .go-btn {
-      width: 100%;
-      padding: 15px;
-      background: var(--primary);
-      border: none;
+
+    .user-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--bg);
+      border: 2px solid transparent;
       border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 16px;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+
+    .user-option:hover {
+      border-color: var(--primary);
+    }
+
+    .user-option-avatar {
+      font-size: 28px;
+    }
+
+    .user-option-name {
+      font-weight: 600;
+    }
+
+    /* All done celebration */
+    .all-done-banner {
+      background: linear-gradient(135deg, var(--accent) 0%, #7BC9A0 100%);
       color: white;
+      text-align: center;
+      padding: 20px;
+      margin: -20px -20px 20px -20px;
       font-size: 18px;
       font-weight: 600;
-      cursor: pointer;
     }
-    .pick-user-modal .go-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 1000;
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <!-- Header with Progress -->
-    <header class="header today-header" id="today-summary">
-      <div class="today-header-content">
-        <div class="today-header-left">
-          <h1>📅 Today's Tasks</h1>
-          <p class="subtitle" id="today-date"></p>
-        </div>
-        <div class="today-progress">
-          <span class="progress-count" id="completed-count">0</span>
-          <span class="progress-total">/<span id="total-count">0</span></span>
-          <span class="progress-label">done</span>
-        </div>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-top">
+      <span class="app-title">Happy Pets</span>
+      <a href="settings.html" class="settings-btn">⚙️</a>
+    </div>
+    <div class="user-bar" id="user-bar" onclick="showUserPicker()">
+      <span class="user-avatar" id="user-avatar">👤</span>
+      <div class="user-info">
+        <div class="user-greeting">Hello!</div>
+        <div class="user-name" id="user-name">Tap to pick your name</div>
       </div>
-      <div class="user-switcher">
-        <select id="user-dropdown" class="user-dropdown" onchange="switchUser(this.value)">
-          <option value="">Who's doing tasks?</option>
-        </select>
-      </div>
-    </header>
+      <span class="user-change">change</span>
+    </div>
+  </header>
 
-    <!-- Pick User Modal -->
-    <div id="pick-user-overlay" class="pick-user-overlay" style="display: none;">
-      <div class="pick-user-modal">
-        <h2>Who's helping today?</h2>
-        <p>Pick your name so we know who did the tasks!</p>
-        <select id="pick-user-select">
-          <option value="">Choose your name...</option>
-        </select>
-        <button class="go-btn" id="pick-user-go" disabled onclick="confirmUserPick()">Let's Go!</button>
+  <!-- Main content -->
+  <main class="main" id="main">
+    <div class="date-line" id="date-line"></div>
+    <div id="tasks-container">
+      <div class="empty-state">
+        <p>Loading...</p>
       </div>
     </div>
+  </main>
 
-    <!-- All Tasks -->
-    <main class="today-tasks" id="today-tasks">
-      <div class="loading-state">
-        <p>Loading tasks...</p>
+  <!-- Pick User Modal -->
+  <div class="modal-overlay" id="user-modal" style="display: none;">
+    <div class="modal">
+      <h2>Who's helping today?</h2>
+      <p>Pick your name</p>
+      <div class="user-options" id="user-options">
+        <!-- Filled by JS -->
       </div>
-    </main>
-
-    <!-- Bottom Nav -->
-    <nav class="bottom-nav">
-      <a href="today.html" class="nav-item active">
-        <span class="nav-icon">📋</span>
-        <span class="nav-label">Today</span>
-      </a>
-      <a href="pets.html" class="nav-item">
-        <span class="nav-icon">🐾</span>
-        <span class="nav-label">Pets</span>
-      </a>
-      <a href="family.html" class="nav-item">
-        <span class="nav-icon">👨‍👩‍👧</span>
-        <span class="nav-label">Family</span>
-      </a>
-    </nav>
+    </div>
   </div>
+
+  <!-- Confetti container -->
+  <div class="confetti" id="confetti"></div>
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js?v=20"></script>
-  <script src="app.js?v=20"></script>
+  <script src="firebase-config.js?v=25"></script>
+  <script src="app.js?v=25"></script>
   <script>
-    // Check auth
+    // Check auth first
     if (!requireAuth()) {
       // Redirect handled by requireAuth
     } else {
       init();
     }
 
-    // Format today's date nicely
-    function formatDate() {
-      const options = { weekday: 'long', month: 'long', day: 'numeric' };
-      return new Date().toLocaleDateString('en-US', options);
-    }
-
     let membersData = [];
+    let petsData = [];
 
     async function init() {
-      document.getElementById('today-date').textContent = formatDate();
-      await loadUserDropdown();
+      // Set date
+      const options = { weekday: 'long', month: 'long', day: 'numeric' };
+      document.getElementById('date-line').textContent = new Date().toLocaleDateString('en-US', options);
 
-      // Check if user is selected - if not, show picker modal
+      // Load data
+      membersData = await getMembers();
+      petsData = await getPetsFromFirestore();
+
+      // Update user display
+      updateUserBar();
+
+      // Check if need to pick user
       const currentMember = getCurrentMember();
       if (!currentMember && membersData.length > 0) {
         showUserPicker();
       }
 
-      await renderTodayTasksAsync();
+      // Render tasks
+      await renderTasks();
+    }
+
+    function updateUserBar() {
+      const member = getCurrentMember();
+      const avatarEl = document.getElementById('user-avatar');
+      const nameEl = document.getElementById('user-name');
+
+      if (member) {
+        avatarEl.textContent = member.avatar;
+        nameEl.textContent = member.name;
+      } else {
+        avatarEl.textContent = '👤';
+        nameEl.textContent = 'Tap to pick your name';
+      }
     }
 
     function showUserPicker() {
-      const overlay = document.getElementById('pick-user-overlay');
-      const select = document.getElementById('pick-user-select');
-      const goBtn = document.getElementById('pick-user-go');
+      const modal = document.getElementById('user-modal');
+      const optionsEl = document.getElementById('user-options');
 
-      let html = '<option value="">Choose your name...</option>';
+      let html = '';
       membersData.forEach(member => {
-        html += `<option value="${member.id}">${member.avatar} ${member.name}</option>`;
+        html += `
+          <button class="user-option" onclick="pickUser('${member.id}')">
+            <span class="user-option-avatar">${member.avatar}</span>
+            <span class="user-option-name">${escapeHtml(member.name)}</span>
+          </button>
+        `;
       });
-      select.innerHTML = html;
 
-      select.onchange = function() {
-        goBtn.disabled = !this.value;
-      };
+      if (membersData.length === 0) {
+        html = '<p>No family members yet. <a href="settings.html">Add members in Settings</a></p>';
+      }
 
-      overlay.style.display = 'flex';
+      optionsEl.innerHTML = html;
+      modal.style.display = 'flex';
     }
 
-    function confirmUserPick() {
-      const select = document.getElementById('pick-user-select');
-      const memberId = select.value;
-      if (!memberId) return;
-
+    function pickUser(memberId) {
       const member = membersData.find(m => m.id === memberId);
       if (member) {
         setCurrentMember(member.id, member.name, member.avatar, member.isParent || false);
-        document.getElementById('pick-user-overlay').style.display = 'none';
-        // Update the header dropdown too
-        document.getElementById('user-dropdown').value = memberId;
+        document.getElementById('user-modal').style.display = 'none';
+        updateUserBar();
       }
     }
 
-    async function loadUserDropdown() {
-      membersData = await getMembers();
-      const dropdown = document.getElementById('user-dropdown');
-      const currentMember = getCurrentMember();
+    async function renderTasks() {
+      const container = document.getElementById('tasks-container');
 
-      let html = '<option value="">Who\'s doing tasks?</option>';
-      membersData.forEach(member => {
-        const isSelected = currentMember && currentMember.id === member.id;
-        html += `<option value="${member.id}" ${isSelected ? 'selected' : ''}>${member.avatar} ${member.name}</option>`;
-      });
-
-      dropdown.innerHTML = html;
-    }
-
-    function switchUser(memberId) {
-      if (!memberId) {
-        // If they deselect, show the picker again
-        showUserPicker();
-        return;
-      }
-
-      const member = membersData.find(m => m.id === memberId);
-      if (member) {
-        setCurrentMember(member.id, member.name, member.avatar, member.isParent || false);
-        // Refresh the page to show tasks with new user
-        location.reload();
-      }
-    }
-
-    // Render all tasks for all pets
-    async function renderTodayTasksAsync() {
-      const container = document.getElementById('today-tasks');
-      const pets = await getPetsFromFirestore();
-
-      if (pets.length === 0) {
+      if (petsData.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
             <p>No pets yet!</p>
-            <a href="add-pet.html" class="add-pet-link">Add your first pet</a>
+            <a href="settings.html">Add your first pet in Settings</a>
           </div>
         `;
         return;
@@ -241,234 +461,146 @@
       let totalTasks = 0;
       let completedTasks = 0;
 
-      for (const pet of pets) {
+      for (const pet of petsData) {
         const config = PET_CONFIG[pet.type] || PET_CONFIG.dog;
         const customTasks = pet.customTasks || [];
 
         if (!pet.tasks || pet.tasks.length === 0) continue;
 
-        let petTasksHtml = '';
-        let petHasTasks = false;
+        let tasksHtml = '';
 
         for (const taskId of pet.tasks) {
-          // Find task in customTasks array (new format)
           const taskData = customTasks.find(ct => ct.id === taskId);
-
-          if (!taskData) {
-            // Legacy support: check old TASK_CONFIG
-            const legacyTask = TASK_CONFIG[taskId];
-            if (!legacyTask) continue;
-
-            petHasTasks = true;
-            totalTasks++;
-            const completion = await getTaskCompletionDetails(pet.id, taskId);
-            const isComplete = !!completion;
-            if (isComplete) completedTasks++;
-
-            const hintText = (pet.taskHints && pet.taskHints[taskId]) || legacyTask.time;
-            const doneText = isComplete ? `Done by ${completion.completedByName || 'someone'} ✨` : escapeHtml(hintText);
-
-            petTasksHtml += `
-              <button class="task-button ${isComplete ? 'completed' : ''}"
-                      data-task-id="${taskId}"
-                      data-hint="${escapeHtml(hintText)}"
-                      onclick="handleTodayTaskClick(this, '${pet.id}', '${taskId}')">
-                <div class="task-icon">${legacyTask.icon}</div>
-                <div class="task-content">
-                  <div class="task-name">${escapeHtml(legacyTask.name)}</div>
-                  <div class="task-time">${doneText}</div>
-                </div>
-                <div class="task-check">${isComplete ? '✓' : ''}</div>
-              </button>
-            `;
-            continue;
-          }
-
-          // Check if task should show today
+          if (!taskData) continue;
           if (!shouldShowTaskToday(taskData)) continue;
 
-          petHasTasks = true;
           totalTasks++;
           const completion = await getTaskCompletionDetails(pet.id, taskId);
-          const isComplete = !!completion;
-          if (isComplete) completedTasks++;
+          const isDone = !!completion;
+          if (isDone) completedTasks++;
 
-          const hint = taskData.details || 'Tap when done!';
-          const reminderTime = taskData.reminderTime || '';
-          const timeDisplay = reminderTime ? formatTime(reminderTime) : '';
-          const overdue = !isComplete && isTaskOverdue(reminderTime);
+          const detail = isDone
+            ? `<span class="done-by">Done by ${completion.completedByName || 'someone'}</span>`
+            : (taskData.details || '');
 
-          let statusText = escapeHtml(hint);
-          let statusClass = isComplete ? 'completed' : (overdue ? 'overdue' : '');
-
-          if (isComplete) {
-            statusText = `Done by ${completion.completedByName || 'someone'} ✨`;
-          } else if (overdue) {
-            statusText = `⚠️ Overdue! Was due at ${timeDisplay}`;
-          } else if (timeDisplay) {
-            statusText = `⏰ ${timeDisplay} • ${escapeHtml(hint)}`;
-          }
-
-          petTasksHtml += `
-            <button class="task-button ${statusClass}"
-                    data-task-id="${taskId}"
-                    data-hint="${escapeHtml(hint)}"
-                    data-reminder-time="${reminderTime}"
-                    onclick="handleTodayTaskClick(this, '${pet.id}', '${taskId}')">
-              <div class="task-icon">${taskData.icon}</div>
-              <div class="task-content">
+          tasksHtml += `
+            <button class="task-item ${isDone ? 'done' : ''}" onclick="toggleTask('${pet.id}', '${taskId}', this)">
+              <span class="task-icon">${taskData.icon}</span>
+              <div class="task-info">
                 <div class="task-name">${escapeHtml(taskData.name)}</div>
-                <div class="task-time">${statusText}</div>
+                <div class="task-detail">${detail}</div>
               </div>
-              <div class="task-check">${isComplete ? '✓' : ''}</div>
+              <div class="task-check">${isDone ? '✓' : ''}</div>
             </button>
           `;
         }
 
-        if (petHasTasks) {
+        if (tasksHtml) {
           html += `
-            <div class="pet-task-group">
-              <div class="pet-task-header">
-                <span class="pet-task-avatar" style="background: ${config.color}">${config.emoji}</span>
-                <span class="pet-task-name">${escapeHtml(pet.name)}</span>
+            <div class="pet-section">
+              <div class="pet-header">
+                <div class="pet-avatar" style="background: ${config.color}">${config.emoji}</div>
+                <div class="pet-name">${escapeHtml(pet.name)}</div>
               </div>
-              <div class="pet-task-list">
-                ${petTasksHtml}
-              </div>
+              <div class="task-list">${tasksHtml}</div>
             </div>
           `;
         }
       }
 
-      if (html === '') {
+      if (!html) {
         html = `
           <div class="empty-state">
-            <p>No tasks scheduled for today!</p>
+            <p>No tasks for today!</p>
+            <a href="settings.html">Add tasks in Settings</a>
           </div>
         `;
       }
 
-      container.innerHTML = html;
-
-      // Update summary
-      document.getElementById('completed-count').textContent = completedTasks;
-      document.getElementById('total-count').textContent = totalTasks;
-
-      // Update header color when all done
-      const summaryEl = document.getElementById('today-summary');
+      // Add all-done banner if complete
       if (totalTasks > 0 && completedTasks === totalTasks) {
-        summaryEl.classList.add('all-done');
-      } else {
-        summaryEl.classList.remove('all-done');
+        html = '<div class="all-done-banner">All done for today!</div>' + html;
       }
+
+      container.innerHTML = html;
     }
 
-    // Handle task click from Today view - optimistic UI update
-    async function handleTodayTaskClick(buttonEl, petId, taskId) {
-      // Must have a user selected
-      const currentMember = getCurrentMember();
-      if (!currentMember) {
+    async function toggleTask(petId, taskId, buttonEl) {
+      // Must have user selected
+      const member = getCurrentMember();
+      if (!member) {
         showUserPicker();
         return;
       }
 
-      const wasComplete = buttonEl.classList.contains('completed');
-      const wasOverdue = buttonEl.classList.contains('overdue');
-      const isNowComplete = !wasComplete;
+      const wasDone = buttonEl.classList.contains('done');
+      const isNowDone = !wasDone;
 
-      // Toggle visual state immediately
-      buttonEl.classList.remove('completed', 'overdue');
-      if (isNowComplete) {
-        buttonEl.classList.add('completed');
-      }
-
-      const timeEl = buttonEl.querySelector('.task-time');
+      // Optimistic UI update
+      buttonEl.classList.toggle('done');
       const checkEl = buttonEl.querySelector('.task-check');
-      const hint = buttonEl.dataset.hint;
-      const reminderTime = buttonEl.dataset.reminderTime || '';
-      const timeDisplay = reminderTime ? formatTime(reminderTime) : '';
+      const detailEl = buttonEl.querySelector('.task-detail');
 
-      if (isNowComplete) {
-        timeEl.textContent = `Done by ${currentMember.name} ✨`;
+      if (isNowDone) {
         checkEl.textContent = '✓';
-        showCelebration();
+        detailEl.innerHTML = `<span class="done-by">Done by ${member.name}</span>`;
+        celebrate();
       } else {
-        // Check if it should show as overdue
-        const overdue = isTaskOverdue(reminderTime);
-        if (overdue) {
-          buttonEl.classList.add('overdue');
-          timeEl.textContent = `⚠️ Overdue! Was due at ${timeDisplay}`;
-        } else if (timeDisplay) {
-          timeEl.textContent = `⏰ ${timeDisplay} • ${hint}`;
-        } else {
-          timeEl.textContent = hint;
-        }
         checkEl.textContent = '';
+        // Restore original detail (we'll just clear it for now)
+        detailEl.textContent = '';
       }
 
-      // Update counter immediately
-      const completedEl = document.getElementById('completed-count');
-      const totalEl = document.getElementById('total-count');
-      let completed = parseInt(completedEl.textContent);
-      const total = parseInt(totalEl.textContent);
-
-      if (isNowComplete) {
-        completed++;
-      } else {
-        completed--;
+      // Save to Firestore
+      try {
+        await toggleTaskInFirestore(petId, taskId);
+        // Re-render to get accurate state
+        await renderTasks();
+      } catch (err) {
+        console.error('Error:', err);
+        // Revert
+        buttonEl.classList.toggle('done');
       }
-      completedEl.textContent = completed;
+    }
 
-      // Update header color
-      const summaryEl = document.getElementById('today-summary');
-      if (total > 0 && completed === total) {
-        summaryEl.classList.add('all-done');
-      } else {
-        summaryEl.classList.remove('all-done');
+    function celebrate() {
+      const confetti = document.getElementById('confetti');
+      const colors = ['#7C9FE8', '#95D5B2', '#F8B4C4', '#FFE5A0'];
+      let particles = '';
+
+      for (let i = 0; i < 30; i++) {
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const left = Math.random() * 100;
+        const delay = Math.random() * 0.5;
+        const size = Math.random() * 8 + 4;
+        particles += `<div style="
+          position: absolute;
+          left: ${left}%;
+          top: -20px;
+          width: ${size}px;
+          height: ${size}px;
+          background: ${color};
+          border-radius: 50%;
+          animation: fall 1s ease-out ${delay}s forwards;
+        "></div>`;
       }
 
-      // Save to Firestore in background
-      toggleTaskInFirestore(petId, taskId).catch(err => {
-        console.error('Error saving task:', err);
-        // Revert on error
-        buttonEl.classList.remove('completed', 'overdue');
-        if (wasComplete) {
-          buttonEl.classList.add('completed');
-          timeEl.textContent = 'Done! ✨';
-          checkEl.textContent = '✓';
-        } else if (wasOverdue) {
-          buttonEl.classList.add('overdue');
-          timeEl.textContent = `⚠️ Overdue! Was due at ${timeDisplay}`;
-        } else if (timeDisplay) {
-          timeEl.textContent = `⏰ ${timeDisplay} • ${hint}`;
-        } else {
-          timeEl.textContent = hint;
-        }
-        completedEl.textContent = wasComplete ? completed + 1 : completed - 1;
-      });
+      confetti.innerHTML = `
+        <style>
+          @keyframes fall {
+            to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+          }
+        </style>
+        ${particles}
+      `;
+
+      setTimeout(() => confetti.innerHTML = '', 1500);
     }
 
     function escapeHtml(text) {
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
-    }
-
-    function formatTime(time24) {
-      if (!time24) return '';
-      const [hours, minutes] = time24.split(':').map(Number);
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const hours12 = hours % 12 || 12;
-      return `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-    }
-
-    function isTaskOverdue(reminderTime) {
-      if (!reminderTime) return false;
-      const now = new Date();
-      const [hours, minutes] = reminderTime.split(':').map(Number);
-      const taskTime = new Date();
-      taskTime.setHours(hours, minutes, 0, 0);
-      return now > taskTime;
     }
   </script>
 </body>

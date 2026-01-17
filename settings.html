@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Happy Pets</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F0EB;
+      --card: #FFFFFF;
+      --primary: #7C9FE8;
+      --accent: #95D5B2;
+      --text: #4A4A4A;
+      --text-light: #8A8A8A;
+      --danger: #E88A9E;
+      --shadow: rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 30px;
+    }
+
+    /* Header */
+    .header {
+      background: var(--card);
+      padding: 20px;
+      padding-top: 50px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      background: var(--bg);
+      border: none;
+      border-radius: 10px;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    /* Main */
+    .main {
+      padding: 20px;
+    }
+
+    /* Sections */
+    .section {
+      margin-bottom: 25px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      padding-left: 5px;
+    }
+
+    .section-card {
+      background: var(--card);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    /* List items */
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .list-item:last-child {
+      border-bottom: none;
+    }
+
+    .list-item:active {
+      background: #f9f9f9;
+    }
+
+    .list-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .list-icon.pet {
+      border-radius: 50%;
+    }
+
+    .list-info {
+      flex: 1;
+    }
+
+    .list-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .list-subtitle {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .list-arrow {
+      color: #ccc;
+      font-size: 18px;
+    }
+
+    /* Add button */
+    .add-item {
+      color: var(--primary);
+    }
+
+    .add-item .list-icon {
+      background: rgba(124, 159, 232, 0.15);
+      color: var(--primary);
+    }
+
+    .add-item .list-title {
+      color: var(--primary);
+    }
+
+    /* Danger button */
+    .danger-item {
+      color: var(--danger);
+    }
+
+    .danger-item .list-icon {
+      background: rgba(232, 138, 158, 0.15);
+    }
+
+    .danger-item .list-title {
+      color: var(--danger);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 25px;
+      max-width: 360px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Avatar/icon picker */
+    .picker-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .picker-option {
+      width: 44px;
+      height: 44px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      background: var(--bg);
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .picker-option.selected {
+      border-color: var(--primary);
+      background: rgba(124, 159, 232, 0.15);
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .btn-cancel {
+      background: #f0f0f0;
+      color: var(--text);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-block {
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 15px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    /* Empty */
+    .empty-text {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <a href="today.html" class="back-btn">←</a>
+    <h1>Settings</h1>
+  </header>
+
+  <main class="main">
+    <!-- Family Members -->
+    <div class="section">
+      <div class="section-title">Family Members</div>
+      <div class="section-card" id="members-list">
+        <div class="empty-text">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Pets -->
+    <div class="section">
+      <div class="section-title">Pets</div>
+      <div class="section-card" id="pets-list">
+        <div class="empty-text">Loading...</div>
+      </div>
+    </div>
+
+    <!-- More -->
+    <div class="section">
+      <div class="section-title">More</div>
+      <div class="section-card">
+        <a href="memories.html" class="list-item">
+          <div class="list-icon" style="background: #FFF0F3;">📸</div>
+          <div class="list-info">
+            <div class="list-title">Memories</div>
+            <div class="list-subtitle">Photos and notes</div>
+          </div>
+          <span class="list-arrow">›</span>
+        </a>
+        <a href="howto.html" class="list-item">
+          <div class="list-icon" style="background: #E8F5E9;">❓</div>
+          <div class="list-info">
+            <div class="list-title">How To Use</div>
+            <div class="list-subtitle">Help guide</div>
+          </div>
+          <span class="list-arrow">›</span>
+        </a>
+        <div class="list-item danger-item" onclick="logout()">
+          <div class="list-icon">🚪</div>
+          <div class="list-info">
+            <div class="list-title">Log Out</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Member Modal -->
+  <div class="modal-overlay" id="member-modal" style="display: none;">
+    <div class="modal">
+      <h2 id="member-modal-title">Add Family Member</h2>
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="member-name" placeholder="e.g., Emma">
+      </div>
+      <div class="form-group">
+        <label>Avatar</label>
+        <div class="picker-grid" id="avatar-picker">
+          <button type="button" class="picker-option selected" data-value="👨">👨</button>
+          <button type="button" class="picker-option" data-value="👩">👩</button>
+          <button type="button" class="picker-option" data-value="👦">👦</button>
+          <button type="button" class="picker-option" data-value="👧">👧</button>
+          <button type="button" class="picker-option" data-value="🧒">🧒</button>
+          <button type="button" class="picker-option" data-value="👶">👶</button>
+          <button type="button" class="picker-option" data-value="🧓">🧓</button>
+          <button type="button" class="picker-option" data-value="👴">👴</button>
+          <button type="button" class="picker-option" data-value="👵">👵</button>
+        </div>
+      </div>
+      <input type="hidden" id="member-id">
+      <div class="btn-row">
+        <button class="btn btn-cancel" onclick="closeMemberModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveMember()">Save</button>
+      </div>
+      <button class="btn btn-danger btn-block" id="delete-member-btn" style="display: none;" onclick="deleteMember()">Delete Member</button>
+    </div>
+  </div>
+
+  <!-- Pet Modal -->
+  <div class="modal-overlay" id="pet-modal" style="display: none;">
+    <div class="modal">
+      <h2 id="pet-modal-title">Add Pet</h2>
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="pet-name" placeholder="e.g., Buddy">
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <div class="picker-grid" id="pet-type-picker">
+          <button type="button" class="picker-option selected" data-value="dog">🐶</button>
+          <button type="button" class="picker-option" data-value="cat">🐱</button>
+          <button type="button" class="picker-option" data-value="hamster">🐹</button>
+          <button type="button" class="picker-option" data-value="bird">🐦</button>
+          <button type="button" class="picker-option" data-value="fish">🐟</button>
+          <button type="button" class="picker-option" data-value="rabbit">🐰</button>
+        </div>
+      </div>
+      <input type="hidden" id="pet-id">
+      <div class="btn-row">
+        <button class="btn btn-cancel" onclick="closePetModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="savePet()">Save</button>
+      </div>
+      <button class="btn btn-danger btn-block" id="delete-pet-btn" style="display: none;" onclick="deletePet()">Delete Pet</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js?v=25"></script>
+  <script src="app.js?v=25"></script>
+  <script>
+    if (!requireAuth()) {
+      // Redirect handled
+    } else {
+      init();
+    }
+
+    let membersData = [];
+    let petsData = [];
+
+    async function init() {
+      await loadMembers();
+      await loadPets();
+      setupPickers();
+    }
+
+    function setupPickers() {
+      // Avatar picker
+      document.querySelectorAll('#avatar-picker .picker-option').forEach(btn => {
+        btn.onclick = () => {
+          document.querySelectorAll('#avatar-picker .picker-option').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+        };
+      });
+
+      // Pet type picker
+      document.querySelectorAll('#pet-type-picker .picker-option').forEach(btn => {
+        btn.onclick = () => {
+          document.querySelectorAll('#pet-type-picker .picker-option').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+        };
+      });
+    }
+
+    // ========== MEMBERS ==========
+    async function loadMembers() {
+      membersData = await getMembers();
+      const container = document.getElementById('members-list');
+
+      if (membersData.length === 0) {
+        container.innerHTML = `
+          <div class="list-item add-item" onclick="openMemberModal()">
+            <div class="list-icon">+</div>
+            <div class="list-info">
+              <div class="list-title">Add Family Member</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      membersData.forEach(member => {
+        html += `
+          <div class="list-item" onclick="openMemberModal('${member.id}')">
+            <div class="list-icon pet" style="background: ${member.color || '#7C9FE8'}">${member.avatar}</div>
+            <div class="list-info">
+              <div class="list-title">${escapeHtml(member.name)}</div>
+              <div class="list-subtitle">${member.isParent ? 'Parent' : 'Helper'}</div>
+            </div>
+            <span class="list-arrow">›</span>
+          </div>
+        `;
+      });
+
+      html += `
+        <div class="list-item add-item" onclick="openMemberModal()">
+          <div class="list-icon">+</div>
+          <div class="list-info">
+            <div class="list-title">Add Family Member</div>
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function openMemberModal(memberId = null) {
+      const modal = document.getElementById('member-modal');
+      const title = document.getElementById('member-modal-title');
+      const nameInput = document.getElementById('member-name');
+      const idInput = document.getElementById('member-id');
+      const deleteBtn = document.getElementById('delete-member-btn');
+
+      if (memberId) {
+        const member = membersData.find(m => m.id === memberId);
+        title.textContent = 'Edit Member';
+        nameInput.value = member.name;
+        idInput.value = memberId;
+        deleteBtn.style.display = 'block';
+
+        // Select avatar
+        document.querySelectorAll('#avatar-picker .picker-option').forEach(btn => {
+          btn.classList.toggle('selected', btn.dataset.value === member.avatar);
+        });
+      } else {
+        title.textContent = 'Add Family Member';
+        nameInput.value = '';
+        idInput.value = '';
+        deleteBtn.style.display = 'none';
+        document.querySelector('#avatar-picker .picker-option').classList.add('selected');
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeMemberModal() {
+      document.getElementById('member-modal').style.display = 'none';
+    }
+
+    async function saveMember() {
+      const name = document.getElementById('member-name').value.trim();
+      const id = document.getElementById('member-id').value;
+      const avatar = document.querySelector('#avatar-picker .picker-option.selected')?.dataset.value || '👤';
+
+      if (!name) {
+        alert('Please enter a name');
+        return;
+      }
+
+      try {
+        if (id) {
+          await updateMember(id, { name, avatar });
+        } else {
+          await addMember(name, avatar, '#7C9FE8', false);
+        }
+        closeMemberModal();
+        await loadMembers();
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    async function deleteMember() {
+      const id = document.getElementById('member-id').value;
+      if (!confirm('Delete this family member?')) return;
+
+      try {
+        await deleteMemberFromFirestore(id);
+        closeMemberModal();
+        await loadMembers();
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    // ========== PETS ==========
+    async function loadPets() {
+      petsData = await getPetsFromFirestore();
+      const container = document.getElementById('pets-list');
+
+      if (petsData.length === 0) {
+        container.innerHTML = `
+          <div class="list-item add-item" onclick="openPetModal()">
+            <div class="list-icon">+</div>
+            <div class="list-info">
+              <div class="list-title">Add Pet</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      petsData.forEach(pet => {
+        const config = PET_CONFIG[pet.type] || PET_CONFIG.dog;
+        const taskCount = pet.tasks ? pet.tasks.length : 0;
+        html += `
+          <a href="edit-pet.html?id=${pet.id}" class="list-item">
+            <div class="list-icon pet" style="background: ${config.color}">${config.emoji}</div>
+            <div class="list-info">
+              <div class="list-title">${escapeHtml(pet.name)}</div>
+              <div class="list-subtitle">${taskCount} task${taskCount !== 1 ? 's' : ''}</div>
+            </div>
+            <span class="list-arrow">›</span>
+          </a>
+        `;
+      });
+
+      html += `
+        <div class="list-item add-item" onclick="openPetModal()">
+          <div class="list-icon">+</div>
+          <div class="list-info">
+            <div class="list-title">Add Pet</div>
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function openPetModal() {
+      const modal = document.getElementById('pet-modal');
+      document.getElementById('pet-modal-title').textContent = 'Add Pet';
+      document.getElementById('pet-name').value = '';
+      document.getElementById('pet-id').value = '';
+      document.getElementById('delete-pet-btn').style.display = 'none';
+      document.querySelector('#pet-type-picker .picker-option').classList.add('selected');
+      modal.style.display = 'flex';
+    }
+
+    function closePetModal() {
+      document.getElementById('pet-modal').style.display = 'none';
+    }
+
+    async function savePet() {
+      const name = document.getElementById('pet-name').value.trim();
+      const type = document.querySelector('#pet-type-picker .picker-option.selected')?.dataset.value || 'dog';
+
+      if (!name) {
+        alert('Please enter a name');
+        return;
+      }
+
+      try {
+        const petId = await addPetToFirestore({ name, type, tasks: [], customTasks: [] });
+        closePetModal();
+        // Go to edit pet to add tasks
+        window.location.href = `edit-pet.html?id=${petId}`;
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
