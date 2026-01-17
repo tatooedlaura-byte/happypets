@@ -525,17 +525,17 @@
   <script src="firebase-config.js?v=31"></script>
   <script src="app.js?v=31"></script>
   <script>
-    if (!requireAuth()) {
-      // Redirect handled
-    } else {
-      init();
-    }
-
     let petId = null;
     let petData = null;
     let tasks = [];
     let currentIcon = '📌';
     let currentSchedule = 'daily';
+
+    if (!requireAuth()) {
+      // Redirect handled
+    } else {
+      init();
+    }
 
     async function init() {
       try {
