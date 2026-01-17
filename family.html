@@ -273,7 +273,8 @@
 
     function selectMember(memberId, memberName, memberAvatar, isParent) {
       setCurrentMember(memberId, memberName, memberAvatar, isParent);
-      renderMembers();
+      // Go to Today page after selecting who you are
+      window.location.href = 'today.html';
     }
 
     function openAddMemberForm() {
