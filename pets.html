@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pets - Happy Pets</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="styles.css?v=21">
+  <style>
+    .pets-list {
+      padding: 20px;
+      padding-bottom: 100px;
+    }
+
+    .pet-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 15px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .pet-row-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .pet-row-info {
+      flex: 1;
+    }
+
+    .pet-row-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .pet-row-type {
+      font-size: 14px;
+      color: var(--text-light);
+    }
+
+    .pet-row-arrow {
+      color: var(--text-light);
+      font-size: 20px;
+    }
+
+    .add-pet-row {
+      border: 2px dashed var(--primary-light);
+      background: transparent;
+      justify-content: center;
+    }
+
+    .add-pet-row:hover {
+      border-color: var(--primary);
+      background: rgba(124, 159, 232, 0.05);
+    }
+
+    .add-pet-text {
+      color: var(--primary);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .section-divider {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-light);
+      padding: 20px 0 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .memories-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .memories-link-icon {
+      font-size: 28px;
+    }
+
+    .memories-link-text {
+      flex: 1;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .memories-link-arrow {
+      color: var(--text-light);
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <h1>Your Pets</h1>
+      <p class="subtitle" id="family-name">Manage your furry friends</p>
+    </header>
+
+    <!-- Pets List -->
+    <main class="pets-list" id="pets-list">
+      <div class="loading-state">
+        <p>Loading pets...</p>
+      </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <a href="today.html" class="nav-item">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">Today</span>
+      </a>
+      <a href="pets.html" class="nav-item active">
+        <span class="nav-icon">🐾</span>
+        <span class="nav-label">Pets</span>
+      </a>
+      <a href="family.html" class="nav-item">
+        <span class="nav-icon">👨‍👩‍👧</span>
+        <span class="nav-label">Family</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js?v=21"></script>
+  <script src="app.js?v=21"></script>
+  <script>
+    // Check auth
+    if (!requireAuth()) {
+      // Redirect handled by requireAuth
+    } else {
+      init();
+    }
+
+    async function init() {
+      const family = getCurrentFamily();
+      if (family) {
+        document.getElementById('family-name').textContent = family.name;
+      }
+      await renderPets();
+    }
+
+    async function renderPets() {
+      const container = document.getElementById('pets-list');
+      let pets;
+
+      try {
+        pets = await getPetsFromFirestore();
+      } catch (error) {
+        console.error('Error loading pets:', error);
+        pets = [];
+      }
+
+      let html = '';
+
+      // Pet rows
+      for (const pet of pets) {
+        const config = PET_CONFIG[pet.type] || PET_CONFIG.dog;
+        html += `
+          <a href="edit-pet.html?id=${pet.id}" class="pet-row">
+            <div class="pet-row-avatar" style="background: ${config.color}">${config.emoji}</div>
+            <div class="pet-row-info">
+              <div class="pet-row-name">${escapeHtml(pet.name)}</div>
+              <div class="pet-row-type">${pet.breed || config.name}</div>
+            </div>
+            <span class="pet-row-arrow">›</span>
+          </a>
+        `;
+      }
+
+      // Add Pet button
+      html += `
+        <a href="add-pet.html" class="pet-row add-pet-row">
+          <span class="add-pet-text">+ Add New Pet</span>
+        </a>
+      `;
+
+      // Memories section
+      html += `
+        <div class="section-divider">Memories</div>
+        <a href="memories.html" class="memories-link">
+          <span class="memories-link-icon">📸</span>
+          <span class="memories-link-text">View All Memories</span>
+          <span class="memories-link-arrow">›</span>
+        </a>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
