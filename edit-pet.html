@@ -540,22 +540,25 @@
     async function init() {
       try {
         petId = getUrlParam('id');
-        console.log('Pet ID from URL:', petId);
 
         if (!petId) {
-          console.log('No pet ID, redirecting to settings');
+          alert('No pet ID in URL');
           window.location.href = 'settings.html';
           return;
         }
 
         petData = await getPetFromFirestore(petId);
-        console.log('Pet data loaded:', petData);
 
         if (!petData) {
-          alert('Could not find this pet. It may have been deleted.');
+          alert('Could not find pet with ID: ' + petId);
           window.location.href = 'settings.html';
           return;
         }
+
+        // Debug: show what we got
+        console.log('Pet loaded:', petData.name);
+        console.log('Tasks array:', petData.tasks);
+        console.log('CustomTasks:', petData.customTasks);
 
         // Update header
         const config = PET_CONFIG[petData.type] || PET_CONFIG.dog;
