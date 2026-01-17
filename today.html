@@ -377,14 +377,23 @@
     let membersData = [];
     let petsData = [];
 
+    let completionsCache = {}; // Cache all completions for today
+
     async function init() {
       // Set date
       const options = { weekday: 'long', month: 'long', day: 'numeric' };
       document.getElementById('date-line').textContent = new Date().toLocaleDateString('en-US', options);
 
-      // Load data
-      membersData = await getMembers();
-      petsData = await getPetsFromFirestore();
+      // Load all data in parallel (faster!)
+      const [members, pets, completions] = await Promise.all([
+        getMembers(),
+        getPetsFromFirestore(),
+        getTaskCompletionsFromFirestore()
+      ]);
+
+      membersData = members;
+      petsData = pets;
+      completionsCache = completions;
 
       // Update user display
       updateUserBar();
@@ -396,7 +405,7 @@
       }
 
       // Render tasks
-      await renderTasks();
+      renderTasks();
 
       // Setup notifications
       setupNotifications();
@@ -532,7 +541,7 @@
       }
     }
 
-    async function renderTasks() {
+    function renderTasks() {
       const container = document.getElementById('tasks-container');
 
       if (petsData.length === 0) {
@@ -563,7 +572,10 @@
           if (!shouldShowTaskToday(taskData)) continue;
 
           totalTasks++;
-          const completion = await getTaskCompletionDetails(pet.id, taskId);
+          // Use cached completions instead of individual queries
+          const today = new Date().toISOString().split('T')[0];
+          const completionKey = `${pet.id}_${taskId}_${today}`;
+          const completion = completionsCache[completionKey];
           const isDone = !!completion;
           if (isDone) completedTasks++;
 
@@ -648,8 +660,9 @@
       // Save to Firestore
       try {
         await toggleTaskInFirestore(petId, taskId);
-        // Re-render to get accurate state
-        await renderTasks();
+        // Refresh cache and re-render
+        completionsCache = await getTaskCompletionsFromFirestore();
+        renderTasks();
       } catch (err) {
         console.error('Error:', err);
         // Revert
