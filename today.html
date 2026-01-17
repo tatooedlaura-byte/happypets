@@ -8,7 +8,7 @@
   <link rel="apple-touch-icon" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="styles.css?v=9">
+  <link rel="stylesheet" href="styles.css?v=11">
   <link rel="stylesheet" href="forms.css?v=8">
 </head>
 <body>
@@ -26,10 +26,11 @@
           <span class="progress-label">done</span>
         </div>
       </div>
-      <a href="family.html" class="current-user-badge" id="current-user-badge" title="Tap to switch user">
-        <span class="current-user-avatar" id="current-user-avatar">👤</span>
-        <span class="current-user-name" id="current-user-name">Select who you are</span>
-      </a>
+      <div class="user-switcher">
+        <select id="user-dropdown" class="user-dropdown" onchange="switchUser(this.value)">
+          <option value="">Who's doing tasks?</option>
+        </select>
+      </div>
     </header>
 
     <!-- All Tasks -->
@@ -79,23 +80,36 @@
       return new Date().toLocaleDateString('en-US', options);
     }
 
+    let membersData = [];
+
     async function init() {
       document.getElementById('today-date').textContent = formatDate();
-      updateCurrentUserBadge();
+      await loadUserDropdown();
       await renderTodayTasksAsync();
     }
 
-    function updateCurrentUserBadge() {
-      const member = getCurrentMember();
-      const avatarEl = document.getElementById('current-user-avatar');
-      const nameEl = document.getElementById('current-user-name');
+    async function loadUserDropdown() {
+      membersData = await getMembers();
+      const dropdown = document.getElementById('user-dropdown');
+      const currentMember = getCurrentMember();
 
+      let html = '<option value="">Who\'s doing tasks?</option>';
+      membersData.forEach(member => {
+        const isSelected = currentMember && currentMember.id === member.id;
+        html += `<option value="${member.id}" ${isSelected ? 'selected' : ''}>${member.avatar} ${member.name}</option>`;
+      });
+
+      dropdown.innerHTML = html;
+    }
+
+    function switchUser(memberId) {
+      if (!memberId) return;
+
+      const member = membersData.find(m => m.id === memberId);
       if (member) {
-        avatarEl.textContent = member.avatar;
-        nameEl.textContent = member.name;
-      } else {
-        avatarEl.textContent = '👤';
-        nameEl.textContent = 'Tap to pick yourself';
+        setCurrentMember(member.id, member.name, member.avatar, member.isParent || false);
+        // Refresh the page to show tasks with new user
+        location.reload();
       }
     }
 
