@@ -212,18 +212,18 @@
       section.classList.toggle('open');
     }
 
+    let currentPetId = null;
+    let tasks = []; // All tasks are now stored here
+    let currentFormIcon = '';
+    let currentFormType = '';
+    let editingTaskId = null; // Track if we're editing an existing task
+
     // Check auth
     if (!requireAuth()) {
       // Redirect handled by requireAuth
     } else {
       initAsync();
     }
-
-    let currentPetId = null;
-    let tasks = []; // All tasks are now stored here
-    let currentFormIcon = '';
-    let currentFormType = '';
-    let editingTaskId = null; // Track if we're editing an existing task
 
     async function initAsync() {
       try {
