@@ -542,7 +542,6 @@
         petId = getUrlParam('id');
 
         if (!petId) {
-          alert('No pet ID in URL');
           window.location.href = 'settings.html';
           return;
         }
@@ -550,15 +549,9 @@
         petData = await getPetFromFirestore(petId);
 
         if (!petData) {
-          alert('Could not find pet with ID: ' + petId);
           window.location.href = 'settings.html';
           return;
         }
-
-        // Debug: show what we got
-        console.log('Pet loaded:', petData.name);
-        console.log('Tasks array:', petData.tasks);
-        console.log('CustomTasks:', petData.customTasks);
 
         // Update header
         const config = PET_CONFIG[petData.type] || PET_CONFIG.dog;
