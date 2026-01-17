@@ -579,7 +579,7 @@
       if (!confirm('Delete this family member?')) return;
 
       try {
-        await deleteMemberFromFirestore(id);
+        await deleteMember(id);
         closeMemberModal();
         await loadMembers();
       } catch (err) {

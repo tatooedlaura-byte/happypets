@@ -249,7 +249,7 @@ async function addPetToFirestore(petData) {
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-  return { id: petRef.id, ...petData };
+  return petRef.id;
 }
 
 async function updatePetInFirestore(petId, updates) {
