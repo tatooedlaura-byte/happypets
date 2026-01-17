@@ -185,6 +185,11 @@
   transform: translateY(0);
 }
 
+.submit-button span,
+.button-icon {
+  pointer-events: none;
+}
+
 .button-icon {
   font-size: 22px;
 }
