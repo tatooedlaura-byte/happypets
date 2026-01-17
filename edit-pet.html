@@ -284,7 +284,9 @@
       document.getElementById('task-form-name').value = '';
       document.getElementById('task-form-details').placeholder = placeholder;
       document.getElementById('task-form-details').value = '';
-      document.querySelector('.task-form-add').textContent = 'Add Task';
+      const addBtn = document.querySelector('.task-form-add');
+      addBtn.textContent = 'Add Task';
+      addBtn.disabled = false;
 
       // Reset schedule to daily
       setSchedule('daily');
@@ -310,7 +312,9 @@
       document.getElementById('task-form-name').value = task.name;
       document.getElementById('task-form-details').placeholder = 'Details';
       document.getElementById('task-form-details').value = task.details || '';
-      document.querySelector('.task-form-add').textContent = 'Save Changes';
+      const addBtn = document.querySelector('.task-form-add');
+      addBtn.textContent = 'Save Changes';
+      addBtn.disabled = false;
 
       // Set schedule
       setSchedule(task.schedule === 'weekly' ? 'weekly' : 'daily');
