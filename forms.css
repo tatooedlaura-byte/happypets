@@ -1287,3 +1287,162 @@
   margin-left: 6px;
   vertical-align: middle;
 }
+
+/* ============================================ */
+/* MEMORIES PAGE */
+/* ============================================ */
+
+.add-memory-section {
+  padding: 20px;
+}
+
+.add-memory-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  border: none;
+  border-radius: 16px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 15px rgba(124, 159, 232, 0.3);
+}
+
+.add-memory-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 159, 232, 0.4);
+}
+
+.add-memory-btn .add-icon {
+  font-size: 20px;
+}
+
+.memories-list {
+  padding: 0 20px 100px;
+}
+
+.memory-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 10px var(--shadow);
+}
+
+.memory-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.memory-pet-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.memory-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.memory-pet-name {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.memory-date {
+  font-size: 12px;
+  color: var(--text-light);
+}
+
+.memory-delete-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-light);
+  font-size: 24px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.memory-delete-btn:hover {
+  background: #FEE;
+  color: #E88A9E;
+}
+
+.memory-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.memory-note {
+  font-size: 14px;
+  color: var(--text-light);
+  line-height: 1.4;
+}
+
+.memory-select {
+  width: 100%;
+  padding: 15px 18px;
+  font-size: 16px;
+  border: 2px solid var(--primary-light);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.memory-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(124, 159, 232, 0.2);
+}
+
+textarea {
+  width: 100%;
+  padding: 15px 18px;
+  font-size: 16px;
+  font-family: inherit;
+  border: 2px solid var(--primary-light);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+  resize: vertical;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(124, 159, 232, 0.2);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-light);
+}
+
+.empty-hint {
+  font-size: 14px;
+  margin-top: 8px;
+}

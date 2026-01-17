@@ -601,4 +601,55 @@ async function getMemberStatsForMember(memberId) {
   return stats[memberId] || { today: 0, thisWeek: 0, total: 0 };
 }
 
+// ============================================
+// MEMORIES (FIRESTORE)
+// ============================================
+
+async function getMemoriesFromFirestore() {
+  const family = getCurrentFamily();
+  if (!family || !family.id) return [];
+
+  const snapshot = await db.collection('families')
+    .doc(family.id)
+    .collection('memories')
+    .orderBy('createdAt', 'desc')
+    .get();
+
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+}
+
+async function addMemoryToFirestore(memoryData) {
+  const family = getCurrentFamily();
+  if (!family || !family.id) throw new Error('Not logged in');
+
+  const member = getCurrentMember();
+
+  await db.collection('families')
+    .doc(family.id)
+    .collection('memories')
+    .add({
+      petId: memoryData.petId,
+      title: memoryData.title,
+      note: memoryData.note || '',
+      createdBy: member ? member.id : null,
+      createdByName: member ? member.name : 'Unknown',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+}
+
+async function deleteMemoryFromFirestore(memoryId) {
+  const family = getCurrentFamily();
+  if (!family || !family.id) throw new Error('Not logged in');
+  if (!memoryId) throw new Error('Memory ID required');
+
+  await db.collection('families')
+    .doc(family.id)
+    .collection('memories')
+    .doc(memoryId)
+    .delete();
+}
+
 console.log('Firebase initialized for Happy Pets');

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How To Use - Happy Pets</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="styles.css?v=20">
+  <link rel="stylesheet" href="forms.css?v=20">
+  <style>
+    .help-section {
+      padding: 20px;
+      padding-bottom: 100px;
+    }
+
+    .help-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 10px var(--shadow);
+    }
+
+    .help-card h3 {
+      font-size: 18px;
+      color: var(--text);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .help-card h3 .help-icon {
+      font-size: 24px;
+    }
+
+    .help-card p {
+      font-size: 15px;
+      color: var(--text-light);
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .help-card p:last-child {
+      margin-bottom: 0;
+    }
+
+    .help-card ul {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+
+    .help-card li {
+      font-size: 14px;
+      color: var(--text-light);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .help-card .tip {
+      background: rgba(124, 159, 232, 0.1);
+      border-left: 3px solid var(--primary);
+      padding: 10px 15px;
+      border-radius: 0 8px 8px 0;
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .help-intro {
+      text-align: center;
+      padding: 20px;
+      margin-bottom: 10px;
+    }
+
+    .help-intro p {
+      color: var(--text-light);
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <h1>How To Use Happy Pets</h1>
+      <p class="subtitle">Quick guide to get you started</p>
+    </header>
+
+    <div class="help-intro">
+      <p>Happy Pets helps your whole family take care of your pets together!</p>
+    </div>
+
+    <!-- Help Content -->
+    <main class="help-section">
+
+      <div class="help-card">
+        <h3><span class="help-icon">1.</span> Getting Started</h3>
+        <p>When you first sign up, you'll create a family account. Then add family members so everyone can help with pet care!</p>
+        <ul>
+          <li>Go to the <strong>Family</strong> page</li>
+          <li>Pick "Add new member" from the dropdown</li>
+          <li>Choose a name, avatar, and color</li>
+          <li>Check "Parent/Guardian" if they can approve tasks</li>
+        </ul>
+      </div>
+
+      <div class="help-card">
+        <h3><span class="help-icon">2.</span> Adding Your Pets</h3>
+        <p>Add each of your pets from the Home page.</p>
+        <ul>
+          <li>Tap the <strong>Add Pet</strong> card on the Home page</li>
+          <li>Enter their name and pick the type of pet</li>
+          <li>After adding, you'll set up their care tasks</li>
+        </ul>
+      </div>
+
+      <div class="help-card">
+        <h3><span class="help-icon">3.</span> Setting Up Tasks</h3>
+        <p>Each pet needs daily care tasks. Here's how to add them:</p>
+        <ul>
+          <li>After adding a pet, tap a task type (Food, Water, Walk, etc.)</li>
+          <li>Give the task a name like "Morning breakfast"</li>
+          <li>Add details like "1 cup of kibble"</li>
+          <li>Set a reminder time if needed</li>
+          <li>Choose if it's daily or specific days</li>
+        </ul>
+        <div class="tip">
+          <strong>Tip:</strong> Tasks are saved automatically when you add them!
+        </div>
+      </div>
+
+      <div class="help-card">
+        <h3><span class="help-icon">4.</span> Doing Daily Tasks</h3>
+        <p>The <strong>Today</strong> page shows all tasks for today across all pets.</p>
+        <ul>
+          <li>Pick who you are from the dropdown at the top</li>
+          <li>Tap a task when you've done it - it'll show a checkmark!</li>
+          <li>Everyone can see who did each task</li>
+        </ul>
+        <div class="tip">
+          <strong>Tip:</strong> Overdue tasks will show a warning so nothing gets forgotten!
+        </div>
+      </div>
+
+      <div class="help-card">
+        <h3><span class="help-icon">5.</span> Saving Memories</h3>
+        <p>The <strong>Memories</strong> page lets you save special moments with your pets.</p>
+        <ul>
+          <li>Tap "Add Memory"</li>
+          <li>Pick which pet the memory is about</li>
+          <li>Describe what happened</li>
+          <li>Add extra notes if you want</li>
+        </ul>
+      </div>
+
+      <div class="help-card">
+        <h3><span class="help-icon">6.</span> Tracking Contributions</h3>
+        <p>See how everyone is helping on the <strong>Family</strong> page!</p>
+        <ul>
+          <li>View tasks completed today, this week, and all time</li>
+          <li>Top helpers appear at the top of the list</li>
+        </ul>
+      </div>
+
+      <div class="help-card">
+        <h3><span class="help-icon">7.</span> Editing Pets & Tasks</h3>
+        <p>Need to change something? Here's how:</p>
+        <ul>
+          <li>From the <strong>Home</strong> page, tap a pet card</li>
+          <li>Tap "Edit Pet" to change their tasks</li>
+          <li>Tap a task to edit it, or use the X to delete</li>
+          <li>Use the arrows to reorder tasks</li>
+        </ul>
+      </div>
+
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </a>
+      <a href="today.html" class="nav-item">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">Today</span>
+      </a>
+      <a href="memories.html" class="nav-item">
+        <span class="nav-icon">📸</span>
+        <span class="nav-label">Memories</span>
+      </a>
+      <a href="family.html" class="nav-item">
+        <span class="nav-icon">👨‍👩‍👧</span>
+        <span class="nav-label">Family</span>
+      </a>
+    </nav>
+  </div>
+</body>
+</html>

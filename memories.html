@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memories - Happy Pets</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="styles.css?v=20">
+  <link rel="stylesheet" href="forms.css?v=20">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <h1>📸 Memories</h1>
+      <p class="subtitle">Special moments with your pets</p>
+    </header>
+
+    <!-- Add Memory Button -->
+    <section class="add-memory-section">
+      <button type="button" class="add-memory-btn" onclick="openAddMemoryForm()">
+        <span class="add-icon">+</span>
+        <span>Add Memory</span>
+      </button>
+    </section>
+
+    <!-- Memories List -->
+    <main class="memories-list" id="memories-list">
+      <div class="loading-state">
+        <p>Loading memories...</p>
+      </div>
+    </main>
+
+    <!-- Add Memory Form Popup -->
+    <div id="memory-form-popup" class="member-form-popup" style="display: none;">
+      <form id="add-memory-form" class="form-section" onsubmit="submitMemory(event)">
+        <h3 id="form-title">Add Memory</h3>
+
+        <div class="form-group">
+          <label for="memory-pet">Which pet?</label>
+          <select id="memory-pet" class="memory-select" required>
+            <option value="">Select a pet...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="memory-title">What happened?</label>
+          <input type="text" id="memory-title" placeholder="e.g., First time at the park!" required>
+        </div>
+
+        <div class="form-group">
+          <label for="memory-note">Tell us more <span class="optional">(optional)</span></label>
+          <textarea id="memory-note" rows="3" placeholder="Add more details about this special moment..."></textarea>
+        </div>
+
+        <div class="form-buttons">
+          <button type="button" class="cancel-btn" onclick="closeMemoryForm()">Cancel</button>
+          <button type="submit" class="submit-button" id="submit-btn">
+            <span>Save Memory</span>
+            <span class="button-icon">💾</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </a>
+      <a href="today.html" class="nav-item">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">Today</span>
+      </a>
+      <a href="memories.html" class="nav-item active">
+        <span class="nav-icon">📸</span>
+        <span class="nav-label">Memories</span>
+      </a>
+      <a href="family.html" class="nav-item">
+        <span class="nav-icon">👨‍👩‍👧</span>
+        <span class="nav-label">Family</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js?v=20"></script>
+  <script src="app.js?v=20"></script>
+  <script>
+    // Check auth
+    if (!requireAuth()) {
+      // Redirect handled by requireAuth
+    } else {
+      init();
+    }
+
+    let petsData = [];
+
+    async function init() {
+      await loadPets();
+      await renderMemories();
+    }
+
+    async function loadPets() {
+      petsData = await getPetsFromFirestore();
+      const select = document.getElementById('memory-pet');
+
+      let html = '<option value="">Select a pet...</option>';
+      petsData.forEach(pet => {
+        const config = PET_CONFIG[pet.type] || PET_CONFIG.dog;
+        html += `<option value="${pet.id}">${config.emoji} ${escapeHtml(pet.name)}</option>`;
+      });
+      select.innerHTML = html;
+    }
+
+    async function renderMemories() {
+      const container = document.getElementById('memories-list');
+      const memories = await getMemoriesFromFirestore();
+
+      if (memories.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>No memories yet!</p>
+            <p class="empty-hint">Tap "Add Memory" to save a special moment</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      memories.forEach(memory => {
+        const pet = petsData.find(p => p.id === memory.petId);
+        const petName = pet ? pet.name : 'Unknown pet';
+        const petConfig = pet ? (PET_CONFIG[pet.type] || PET_CONFIG.dog) : PET_CONFIG.dog;
+        const date = memory.createdAt ? new Date(memory.createdAt.toDate()).toLocaleDateString('en-US', {
+          month: 'short', day: 'numeric', year: 'numeric'
+        }) : '';
+
+        html += `
+          <div class="memory-card">
+            <div class="memory-header">
+              <span class="memory-pet-avatar" style="background: ${petConfig.color}">${petConfig.emoji}</span>
+              <div class="memory-meta">
+                <span class="memory-pet-name">${escapeHtml(petName)}</span>
+                <span class="memory-date">${date}</span>
+              </div>
+              <button class="memory-delete-btn" onclick="deleteMemory('${memory.id}')" title="Delete">×</button>
+            </div>
+            <h3 class="memory-title">${escapeHtml(memory.title)}</h3>
+            ${memory.note ? `<p class="memory-note">${escapeHtml(memory.note)}</p>` : ''}
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function openAddMemoryForm() {
+      document.getElementById('memory-pet').value = '';
+      document.getElementById('memory-title').value = '';
+      document.getElementById('memory-note').value = '';
+      document.getElementById('memory-form-popup').style.display = 'block';
+    }
+
+    function closeMemoryForm() {
+      document.getElementById('memory-form-popup').style.display = 'none';
+    }
+
+    async function submitMemory(e) {
+      e.preventDefault();
+
+      const petId = document.getElementById('memory-pet').value;
+      const title = document.getElementById('memory-title').value.trim();
+      const note = document.getElementById('memory-note').value.trim();
+      const submitBtn = document.getElementById('submit-btn');
+
+      if (!petId || !title) return;
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Saving...</span>';
+
+      try {
+        await addMemoryToFirestore({ petId, title, note });
+        closeMemoryForm();
+        await renderMemories();
+      } catch (error) {
+        alert('Error saving: ' + error.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Save Memory</span><span class="button-icon">💾</span>';
+      }
+    }
+
+    async function deleteMemory(memoryId) {
+      if (!confirm('Delete this memory?')) return;
+
+      try {
+        await deleteMemoryFromFirestore(memoryId);
+        await renderMemories();
+      } catch (error) {
+        alert('Error deleting: ' + error.message);
+      }
+    }
+  </script>
+</body>
+</html>
