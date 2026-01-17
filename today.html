@@ -397,6 +397,94 @@
 
       // Render tasks
       await renderTasks();
+
+      // Setup notifications
+      setupNotifications();
+    }
+
+    // ============================================
+    // NOTIFICATION SYSTEM
+    // ============================================
+
+    let notifiedTasks = new Set(); // Track which tasks we've already notified about today
+
+    async function setupNotifications() {
+      // Check if notifications are supported
+      if (!('Notification' in window)) {
+        console.log('Notifications not supported');
+        return;
+      }
+
+      // Request permission if not already granted
+      if (Notification.permission === 'default') {
+        const permission = await Notification.requestPermission();
+        console.log('Notification permission:', permission);
+      }
+
+      // Load already-notified tasks for today from localStorage
+      const todayKey = new Date().toISOString().split('T')[0];
+      const storedNotified = localStorage.getItem('notified_tasks_' + todayKey);
+      if (storedNotified) {
+        notifiedTasks = new Set(JSON.parse(storedNotified));
+      } else {
+        // Clear old days
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('notified_tasks_') && !key.includes(todayKey)) {
+            localStorage.removeItem(key);
+          }
+        }
+      }
+
+      // Check for due reminders every minute
+      checkReminders();
+      setInterval(checkReminders, 60000);
+    }
+
+    function checkReminders() {
+      if (Notification.permission !== 'granted') return;
+
+      const now = new Date();
+      const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+      const todayKey = now.toISOString().split('T')[0];
+
+      for (const pet of petsData) {
+        const customTasks = pet.customTasks || [];
+
+        for (const taskId of (pet.tasks || [])) {
+          const taskData = customTasks.find(ct => ct.id === taskId);
+          if (!taskData || !taskData.reminderTime) continue;
+          if (!shouldShowTaskToday(taskData)) continue;
+
+          // Check if reminder time matches current time (within the same minute)
+          if (taskData.reminderTime === currentTime) {
+            const taskKey = pet.id + '_' + taskId;
+
+            // Don't notify if already notified today
+            if (notifiedTasks.has(taskKey)) continue;
+
+            // Don't notify if task is already done
+            getTaskCompletionDetails(pet.id, taskId).then(completion => {
+              if (!completion) {
+                showNotification(pet, taskData);
+                notifiedTasks.add(taskKey);
+                localStorage.setItem('notified_tasks_' + todayKey, JSON.stringify([...notifiedTasks]));
+              }
+            });
+          }
+        }
+      }
+    }
+
+    function showNotification(pet, taskData) {
+      const config = PET_CONFIG[pet.type] || PET_CONFIG.dog;
+
+      new Notification('Happy Pets Reminder', {
+        body: `Time to ${taskData.name.toLowerCase()} for ${pet.name}!`,
+        icon: 'icon.png',
+        tag: pet.id + '_' + taskData.id,
+        requireInteraction: true
+      });
     }
 
     function updateUserBar() {
@@ -479,9 +567,15 @@
           const isDone = !!completion;
           if (isDone) completedTasks++;
 
-          const detail = isDone
-            ? `<span class="done-by">Done by ${completion.completedByName || 'someone'}</span>`
-            : (taskData.details || '');
+          let detail = '';
+          if (isDone) {
+            detail = `<span class="done-by">Done by ${completion.completedByName || 'someone'}</span>`;
+          } else {
+            const parts = [];
+            if (taskData.reminderTime) parts.push(formatTime(taskData.reminderTime));
+            if (taskData.details) parts.push(taskData.details);
+            detail = parts.join(' • ') || '';
+          }
 
           tasksHtml += `
             <button class="task-item ${isDone ? 'done' : ''}" onclick="toggleTask('${pet.id}', '${taskId}', this)">
@@ -601,6 +695,15 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+
+    function formatTime(time24) {
+      if (!time24) return '';
+      const [hours, minutes] = time24.split(':');
+      const h = parseInt(hours);
+      const ampm = h >= 12 ? 'pm' : 'am';
+      const h12 = h % 12 || 12;
+      return h12 + ':' + minutes + ampm;
     }
   </script>
 </body>

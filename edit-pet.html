@@ -433,6 +433,11 @@
       </div>
 
       <div class="form-group">
+        <label>Reminder Time (optional)</label>
+        <input type="time" id="task-time" style="width: 100%; padding: 14px 16px; font-size: 16px; border: 2px solid #e0e0e0; border-radius: 12px; font-family: inherit; background: var(--card);">
+      </div>
+
+      <div class="form-group">
         <label>Schedule</label>
         <div class="schedule-row">
           <button class="schedule-btn active" id="schedule-daily" onclick="setSchedule('daily')">Daily</button>
@@ -534,12 +539,16 @@
           ? task.days.map(d => ['Su','Mo','Tu','We','Th','Fr','Sa'][d]).join(', ')
           : 'Daily';
 
+        const parts = [scheduleText];
+        if (task.reminderTime) parts.push(formatTime(task.reminderTime));
+        if (task.details) parts.push(escapeHtml(task.details));
+
         html += `
           <div class="task-item">
             <span class="task-item-icon">${task.icon}</span>
             <div class="task-item-info">
               <div class="task-item-name">${escapeHtml(task.name)}</div>
-              <div class="task-item-detail">${scheduleText}${task.details ? ' • ' + escapeHtml(task.details) : ''}</div>
+              <div class="task-item-detail">${parts.join(' • ')}</div>
             </div>
             <div class="task-item-btns">
               <button class="task-btn task-btn-edit" onclick="editTask('${task.id}')">✎</button>
@@ -558,6 +567,7 @@
       document.getElementById('modal-title').textContent = 'Add ' + name;
       document.getElementById('task-name').value = '';
       document.getElementById('task-details').value = '';
+      document.getElementById('task-time').value = '';
       document.getElementById('editing-task-id').value = '';
       setSchedule('daily');
       document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
@@ -573,6 +583,7 @@
       document.getElementById('modal-title').textContent = 'Edit Task';
       document.getElementById('task-name').value = task.name;
       document.getElementById('task-details').value = task.details || '';
+      document.getElementById('task-time').value = task.reminderTime || '';
       document.getElementById('editing-task-id').value = taskId;
 
       setSchedule(task.schedule || 'daily');
@@ -603,6 +614,7 @@
       }
 
       const details = document.getElementById('task-details').value.trim();
+      const reminderTime = document.getElementById('task-time').value;
       const editingId = document.getElementById('editing-task-id').value;
       const days = Array.from(document.querySelectorAll('.day-btn.active')).map(b => parseInt(b.dataset.day));
 
@@ -612,6 +624,7 @@
         if (task) {
           task.name = name;
           task.details = details;
+          task.reminderTime = reminderTime;
           task.schedule = currentSchedule;
           task.days = currentSchedule === 'weekly' ? days : [];
         }
@@ -622,6 +635,7 @@
           icon: currentIcon,
           name,
           details,
+          reminderTime,
           schedule: currentSchedule,
           days: currentSchedule === 'weekly' ? days : []
         });
@@ -659,6 +673,15 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+
+    function formatTime(time24) {
+      if (!time24) return '';
+      const [hours, minutes] = time24.split(':');
+      const h = parseInt(hours);
+      const ampm = h >= 12 ? 'pm' : 'am';
+      const h12 = h % 12 || 12;
+      return h12 + ':' + minutes + ampm;
     }
   </script>
 </body>
