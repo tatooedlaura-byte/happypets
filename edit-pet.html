@@ -265,8 +265,7 @@
         submitBtn.innerHTML = '<span>Save Changes</span><span class="button-icon">✓</span>';
       } catch (error) {
         console.error('Error loading pet:', error);
-        alert('Error loading pet data. Please try again.');
-        window.location.href = 'index.html';
+        alert('Error loading pet: ' + error.message);
       }
     }
 

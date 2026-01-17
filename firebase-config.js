@@ -214,7 +214,8 @@ async function getPetsFromFirestore() {
 
 async function getPetFromFirestore(petId) {
   const family = getCurrentFamily();
-  if (!family) return null;
+  if (!family || !family.id) return null;
+  if (!petId) return null;
 
   const doc = await db.collection('families')
     .doc(family.id)
