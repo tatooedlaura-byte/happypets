@@ -169,8 +169,8 @@
         </div>
       </div>
 
-      <button type="submit" class="submit-button">
-        <span>Save Changes</span>
+      <button type="submit" class="submit-button" disabled>
+        <span>Loading...</span>
         <span class="button-icon">✓</span>
       </button>
 
@@ -226,37 +226,48 @@
     let editingTaskId = null; // Track if we're editing an existing task
 
     async function initAsync() {
-      currentPetId = getUrlParam('id');
-      if (!currentPetId || currentPetId.trim() === '') {
+      try {
+        currentPetId = getUrlParam('id');
+        if (!currentPetId || currentPetId.trim() === '') {
+          window.location.href = 'index.html';
+          return;
+        }
+
+        const pet = await getPetFromFirestore(currentPetId);
+        if (!pet) {
+          window.location.href = 'index.html';
+          return;
+        }
+
+        // Set back button to return to pet view
+        document.getElementById('back-button').href = `pet-view.html?id=${currentPetId}`;
+
+        // Update header
+        const config = PET_CONFIG[pet.type] || PET_CONFIG.dog;
+        document.getElementById('edit-header').style.background =
+          `linear-gradient(135deg, ${config.color} 0%, ${lightenColor(config.color)} 100%)`;
+        document.getElementById('pet-avatar').textContent = config.emoji;
+        document.getElementById('pet-type-display').textContent = config.name;
+
+        // Fill in form fields
+        document.getElementById('pet-name').value = pet.name;
+        document.getElementById('pet-breed').value = pet.breed || '';
+
+        // Load tasks - now all tasks are in customTasks
+        tasks = pet.customTasks || [];
+
+        renderTasksList();
+        renderTaskOrderList();
+
+        // Enable save button now that pet is loaded
+        const submitBtn = document.querySelector('.submit-button');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Save Changes</span><span class="button-icon">✓</span>';
+      } catch (error) {
+        console.error('Error loading pet:', error);
+        alert('Error loading pet data. Please try again.');
         window.location.href = 'index.html';
-        return;
       }
-
-      const pet = await getPetFromFirestore(currentPetId);
-      if (!pet) {
-        window.location.href = 'index.html';
-        return;
-      }
-
-      // Set back button to return to pet view
-      document.getElementById('back-button').href = `pet-view.html?id=${currentPetId}`;
-
-      // Update header
-      const config = PET_CONFIG[pet.type] || PET_CONFIG.dog;
-      document.getElementById('edit-header').style.background =
-        `linear-gradient(135deg, ${config.color} 0%, ${lightenColor(config.color)} 100%)`;
-      document.getElementById('pet-avatar').textContent = config.emoji;
-      document.getElementById('pet-type-display').textContent = config.name;
-
-      // Fill in form fields
-      document.getElementById('pet-name').value = pet.name;
-      document.getElementById('pet-breed').value = pet.breed || '';
-
-      // Load tasks - now all tasks are in customTasks
-      tasks = pet.customTasks || [];
-
-      renderTasksList();
-      renderTaskOrderList();
     }
 
     // ============================================
