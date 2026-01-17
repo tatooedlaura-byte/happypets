@@ -61,6 +61,18 @@
     .header h1 {
       font-size: 20px;
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .edit-name-btn {
+      background: none;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      opacity: 0.5;
+      padding: 4px;
     }
 
     .header-sub {
@@ -70,6 +82,45 @@
 
     .pet-icon {
       font-size: 36px;
+    }
+
+    /* Inline name edit */
+    .name-edit-row {
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .name-edit-row.active {
+      display: flex;
+    }
+
+    .name-edit-row input {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      font-family: inherit;
+    }
+
+    .name-edit-row button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .name-save-btn {
+      background: var(--primary);
+      color: white;
+    }
+
+    .name-cancel-btn {
+      background: #f0f0f0;
+      color: var(--text);
     }
 
     /* Main */
@@ -357,21 +408,29 @@
   <header class="header">
     <a href="settings.html" class="back-btn" id="back-btn">←</a>
     <div class="header-info">
-      <h1 id="pet-name-display">Edit Pet</h1>
+      <h1>
+        <span id="pet-name-display">Pet</span>
+        <button class="edit-name-btn" onclick="showNameEdit()" title="Rename">✎</button>
+      </h1>
       <div class="header-sub" id="pet-type-display"></div>
+      <div class="name-edit-row" id="name-edit-row">
+        <input type="text" id="pet-name" placeholder="Pet name">
+        <button class="name-save-btn" onclick="saveName()">Save</button>
+        <button class="name-cancel-btn" onclick="hideNameEdit()">Cancel</button>
+      </div>
     </div>
     <span class="pet-icon" id="pet-icon">🐾</span>
   </header>
 
   <main class="main">
-    <!-- Pet Name -->
-    <div class="form-group">
-      <label>Pet's Name</label>
-      <input type="text" id="pet-name" placeholder="What's their name?">
+    <!-- Current Tasks (show first - this is what they came to manage) -->
+    <div class="section-header">Tasks</div>
+    <div class="task-list" id="task-list">
+      <div class="empty-tasks">No tasks yet</div>
     </div>
 
-    <!-- Add Tasks -->
-    <div class="section-header">Add Tasks</div>
+    <!-- Add Tasks (secondary - smaller section) -->
+    <div class="section-header" style="margin-top: 30px;">Add New Task</div>
     <div class="task-types">
       <button class="task-type-btn" onclick="openTaskModal('🥣', 'Food')">
         <span class="task-type-icon">🥣</span>
@@ -405,12 +464,6 @@
         <span class="task-type-icon">📌</span>
         <span class="task-type-label">Other</span>
       </button>
-    </div>
-
-    <!-- Current Tasks -->
-    <div class="section-header">Current Tasks</div>
-    <div class="task-list" id="task-list">
-      <div class="empty-tasks">No tasks yet</div>
     </div>
 
     <!-- Delete Pet -->
@@ -500,15 +553,9 @@
       document.getElementById('pet-type-display').textContent = config.name;
       document.getElementById('pet-icon').textContent = config.emoji;
 
-      // Fill form
-      document.getElementById('pet-name').value = petData.name;
-
       // Load tasks
       tasks = petData.customTasks || [];
       renderTasks();
-
-      // Auto-save name on blur
-      document.getElementById('pet-name').addEventListener('blur', saveName);
 
       // Setup day buttons
       document.querySelectorAll('.day-btn').forEach(btn => {
@@ -516,20 +563,35 @@
       });
     }
 
+    function showNameEdit() {
+      document.getElementById('pet-name').value = petData.name;
+      document.getElementById('name-edit-row').classList.add('active');
+      document.getElementById('pet-name').focus();
+    }
+
+    function hideNameEdit() {
+      document.getElementById('name-edit-row').classList.remove('active');
+    }
+
     async function saveName() {
       const name = document.getElementById('pet-name').value.trim();
-      if (name && name !== petData.name) {
+      if (!name) {
+        alert('Please enter a name');
+        return;
+      }
+      if (name !== petData.name) {
         await updatePetInFirestore(petId, { name });
         petData.name = name;
         document.getElementById('pet-name-display').textContent = name;
       }
+      hideNameEdit();
     }
 
     function renderTasks() {
       const container = document.getElementById('task-list');
 
       if (tasks.length === 0) {
-        container.innerHTML = '<div class="empty-tasks">No tasks yet. Tap a button above to add one.</div>';
+        container.innerHTML = '<div class="empty-tasks">No tasks yet. Add one below!</div>';
         return;
       }
 
