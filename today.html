@@ -8,8 +8,8 @@
   <link rel="apple-touch-icon" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="styles.css?v=8">
-  <link rel="stylesheet" href="forms.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=9">
+  <link rel="stylesheet" href="forms.css?v=5">
 </head>
 <body>
   <div class="app">
@@ -168,15 +168,31 @@
           if (isComplete) completedTasks++;
 
           const hint = taskData.details || 'Tap when done!';
+          const reminderTime = taskData.reminderTime || '';
+          const timeDisplay = reminderTime ? formatTime(reminderTime) : '';
+          const overdue = !isComplete && isTaskOverdue(reminderTime);
+
+          let statusText = escapeHtml(hint);
+          let statusClass = isComplete ? 'completed' : (overdue ? 'overdue' : '');
+
+          if (isComplete) {
+            statusText = 'Done! ✨';
+          } else if (overdue) {
+            statusText = `⚠️ Overdue! Was due at ${timeDisplay}`;
+          } else if (timeDisplay) {
+            statusText = `⏰ ${timeDisplay} • ${escapeHtml(hint)}`;
+          }
+
           petTasksHtml += `
-            <button class="task-button ${isComplete ? 'completed' : ''}"
+            <button class="task-button ${statusClass}"
                     data-task-id="${taskId}"
                     data-hint="${escapeHtml(hint)}"
+                    data-reminder-time="${reminderTime}"
                     onclick="handleTodayTaskClick(this, '${pet.id}', '${taskId}')">
               <div class="task-icon">${taskData.icon}</div>
               <div class="task-content">
                 <div class="task-name">${escapeHtml(taskData.name)}</div>
-                <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(hint)}</div>
+                <div class="task-time">${statusText}</div>
               </div>
               <div class="task-check">${isComplete ? '✓' : ''}</div>
             </button>
@@ -224,20 +240,36 @@
     // Handle task click from Today view - optimistic UI update
     async function handleTodayTaskClick(buttonEl, petId, taskId) {
       const wasComplete = buttonEl.classList.contains('completed');
+      const wasOverdue = buttonEl.classList.contains('overdue');
       const isNowComplete = !wasComplete;
 
       // Toggle visual state immediately
-      buttonEl.classList.toggle('completed');
+      buttonEl.classList.remove('completed', 'overdue');
+      if (isNowComplete) {
+        buttonEl.classList.add('completed');
+      }
+
       const timeEl = buttonEl.querySelector('.task-time');
       const checkEl = buttonEl.querySelector('.task-check');
       const hint = buttonEl.dataset.hint;
+      const reminderTime = buttonEl.dataset.reminderTime || '';
+      const timeDisplay = reminderTime ? formatTime(reminderTime) : '';
 
       if (isNowComplete) {
         timeEl.textContent = 'Done! ✨';
         checkEl.textContent = '✓';
         showCelebration();
       } else {
-        timeEl.textContent = hint;
+        // Check if it should show as overdue
+        const overdue = isTaskOverdue(reminderTime);
+        if (overdue) {
+          buttonEl.classList.add('overdue');
+          timeEl.textContent = `⚠️ Overdue! Was due at ${timeDisplay}`;
+        } else if (timeDisplay) {
+          timeEl.textContent = `⏰ ${timeDisplay} • ${hint}`;
+        } else {
+          timeEl.textContent = hint;
+        }
         checkEl.textContent = '';
       }
 
@@ -266,9 +298,19 @@
       toggleTaskInFirestore(petId, taskId).catch(err => {
         console.error('Error saving task:', err);
         // Revert on error
-        buttonEl.classList.toggle('completed');
-        timeEl.textContent = wasComplete ? 'Done! ✨' : hint;
-        checkEl.textContent = wasComplete ? '✓' : '';
+        buttonEl.classList.remove('completed', 'overdue');
+        if (wasComplete) {
+          buttonEl.classList.add('completed');
+          timeEl.textContent = 'Done! ✨';
+          checkEl.textContent = '✓';
+        } else if (wasOverdue) {
+          buttonEl.classList.add('overdue');
+          timeEl.textContent = `⚠️ Overdue! Was due at ${timeDisplay}`;
+        } else if (timeDisplay) {
+          timeEl.textContent = `⏰ ${timeDisplay} • ${hint}`;
+        } else {
+          timeEl.textContent = hint;
+        }
         completedEl.textContent = wasComplete ? completed + 1 : completed - 1;
       });
     }
@@ -277,6 +319,23 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+
+    function formatTime(time24) {
+      if (!time24) return '';
+      const [hours, minutes] = time24.split(':').map(Number);
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const hours12 = hours % 12 || 12;
+      return `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+    }
+
+    function isTaskOverdue(reminderTime) {
+      if (!reminderTime) return false;
+      const now = new Date();
+      const [hours, minutes] = reminderTime.split(':').map(Number);
+      const taskTime = new Date();
+      taskTime.setHours(hours, minutes, 0, 0);
+      return now > taskTime;
     }
   </script>
 </body>

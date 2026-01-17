@@ -27,6 +27,12 @@
       <p>Loading your pets...</p>
     </div>
 
+    <!-- Pending Approvals (for parents) -->
+    <section class="approvals-section" id="approvals-section" style="display: none;">
+      <h2>⏳ Waiting for Your OK</h2>
+      <div id="approvals-list"></div>
+    </section>
+
     <!-- Pet Cards (rendered dynamically) -->
     <main class="pet-grid" id="pet-cards-container" style="display: none;">
       <!-- Pets will be loaded here by JavaScript -->
@@ -95,11 +101,120 @@
 
       await renderPetCardsAsync();
       await renderKindnessJarAsync();
+      await renderPendingApprovals();
 
       // Show content, hide loading
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('pet-cards-container').style.display = 'grid';
       document.getElementById('kindness-section').style.display = 'block';
+    }
+
+    async function renderPendingApprovals() {
+      const member = getCurrentMember();
+      const approvalsSection = document.getElementById('approvals-section');
+      const approvalsList = document.getElementById('approvals-list');
+
+      // Only show for parents
+      if (!member || !member.isParent) {
+        approvalsSection.style.display = 'none';
+        return;
+      }
+
+      try {
+        const pending = await getPendingApprovals();
+
+        if (pending.length === 0) {
+          approvalsSection.style.display = 'none';
+          return;
+        }
+
+        // Get pet names for display
+        const pets = await getPetsFromFirestore();
+        const petMap = {};
+        pets.forEach(p => petMap[p.id] = p);
+
+        let html = '';
+        for (const item of pending) {
+          const pet = petMap[item.petId];
+          const petName = pet ? pet.name : 'Unknown Pet';
+
+          // Try to get task name
+          let taskName = item.taskId;
+          if (pet && pet.customTasks) {
+            const task = pet.customTasks.find(t => t.id === item.taskId);
+            if (task) taskName = task.name;
+          }
+          // Check legacy tasks
+          if (typeof TASK_CONFIG !== 'undefined' && TASK_CONFIG[item.taskId]) {
+            taskName = TASK_CONFIG[item.taskId].name;
+          }
+
+          html += `
+            <div class="approval-item" id="approval-${item.id}">
+              <div class="approval-info">
+                <div class="approval-task">${escapeHtml(taskName)}</div>
+                <div class="approval-by">${escapeHtml(item.completedByName)} • ${escapeHtml(petName)}</div>
+              </div>
+              <div class="approval-actions">
+                <button class="approve-btn" onclick="handleApprove('${item.id}')" title="Approve">✓</button>
+                <button class="reject-btn" onclick="handleReject('${item.id}')" title="Reject">✗</button>
+              </div>
+            </div>
+          `;
+        }
+
+        approvalsList.innerHTML = html;
+        approvalsSection.style.display = 'block';
+
+      } catch (error) {
+        console.error('Error loading approvals:', error);
+        approvalsSection.style.display = 'none';
+      }
+    }
+
+    async function handleApprove(completionId) {
+      const item = document.getElementById(`approval-${completionId}`);
+      if (item) item.style.opacity = '0.5';
+
+      try {
+        await approveTask(completionId);
+        if (item) item.remove();
+
+        // Check if any approvals left
+        const list = document.getElementById('approvals-list');
+        if (list && list.children.length === 0) {
+          document.getElementById('approvals-section').style.display = 'none';
+        }
+
+        // Refresh kindness jar
+        await renderKindnessJarAsync();
+      } catch (error) {
+        console.error('Error approving:', error);
+        if (item) item.style.opacity = '1';
+        alert('Error approving task');
+      }
+    }
+
+    async function handleReject(completionId) {
+      if (!confirm('Reject this task? The helper will need to do it again.')) return;
+
+      const item = document.getElementById(`approval-${completionId}`);
+      if (item) item.style.opacity = '0.5';
+
+      try {
+        await rejectTask(completionId);
+        if (item) item.remove();
+
+        // Check if any approvals left
+        const list = document.getElementById('approvals-list');
+        if (list && list.children.length === 0) {
+          document.getElementById('approvals-section').style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Error rejecting:', error);
+        if (item) item.style.opacity = '1';
+        alert('Error rejecting task');
+      }
     }
 
     async function renderPetCardsAsync() {

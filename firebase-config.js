@@ -45,16 +45,22 @@ function getCurrentMember() {
   const memberId = sessionStorage.getItem('happypets_memberId');
   const memberName = sessionStorage.getItem('happypets_memberName');
   const memberAvatar = sessionStorage.getItem('happypets_memberAvatar');
+  const isParent = sessionStorage.getItem('happypets_memberIsParent') === 'true';
   if (memberId && memberName) {
-    return { id: memberId, name: memberName, avatar: memberAvatar || '👤' };
+    return { id: memberId, name: memberName, avatar: memberAvatar || '👤', isParent };
   }
   return null;
 }
 
-function setCurrentMember(memberId, memberName, memberAvatar) {
+function setCurrentMember(memberId, memberName, memberAvatar, isParent) {
   sessionStorage.setItem('happypets_memberId', memberId);
   sessionStorage.setItem('happypets_memberName', memberName);
   sessionStorage.setItem('happypets_memberAvatar', memberAvatar || '👤');
+  sessionStorage.setItem('happypets_memberIsParent', isParent ? 'true' : 'false');
+}
+
+function isCurrentMemberParent() {
+  return sessionStorage.getItem('happypets_memberIsParent') === 'true';
 }
 
 // ============================================
@@ -326,11 +332,30 @@ async function isTaskCompleteInFirestore(petId, taskId) {
   return doc.exists;
 }
 
-async function toggleTaskInFirestore(petId, taskId) {
+async function getTaskCompletionDetails(petId, taskId) {
+  const family = getCurrentFamily();
+  if (!family) return null;
+
+  const today = getTodayKey();
+  const docId = `${today}_${petId}_${taskId}`;
+
+  const doc = await db.collection('families')
+    .doc(family.id)
+    .collection('taskCompletions')
+    .doc(docId)
+    .get();
+
+  if (!doc.exists) return null;
+
+  return doc.data();
+}
+
+async function toggleTaskInFirestore(petId, taskId, requiresApproval = false) {
   const family = getCurrentFamily();
   if (!family) throw new Error('Not logged in');
 
   const member = getCurrentMember();
+  const isParent = member ? member.isParent : false;
   const today = getTodayKey();
   const docId = `${today}_${petId}_${taskId}`;
 
@@ -342,11 +367,26 @@ async function toggleTaskInFirestore(petId, taskId) {
   const doc = await docRef.get();
 
   if (doc.exists) {
-    // Task was complete, mark as incomplete
+    const data = doc.data();
+    // If pending and user is parent, this is an approval
+    if (data.status === 'pending' && isParent) {
+      await docRef.update({
+        status: 'approved',
+        approvedBy: member.id,
+        approvedByName: member.name,
+        approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      // Add kindness now that it's approved
+      await addKindnessToFirestore(data.completedBy);
+      return true;
+    }
+    // Otherwise, mark as incomplete (delete)
     await docRef.delete();
     return false;
   } else {
     // Task was incomplete, mark as complete
+    const needsApproval = requiresApproval && !isParent;
+
     await docRef.set({
       petId,
       taskId,
@@ -354,14 +394,78 @@ async function toggleTaskInFirestore(petId, taskId) {
       completedBy: member ? member.id : null,
       completedByName: member ? member.name : 'Someone',
       completedByAvatar: member ? member.avatar : '👤',
-      completedAt: firebase.firestore.FieldValue.serverTimestamp()
+      completedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      status: needsApproval ? 'pending' : 'approved'
     });
 
-    // Add to kindness
-    await addKindnessToFirestore(member ? member.id : null);
+    // Only add to kindness if approved (or doesn't need approval)
+    if (!needsApproval) {
+      await addKindnessToFirestore(member ? member.id : null);
+    }
 
     return true;
   }
+}
+
+async function getPendingApprovals() {
+  const family = getCurrentFamily();
+  if (!family) return [];
+
+  const today = getTodayKey();
+
+  const snapshot = await db.collection('families')
+    .doc(family.id)
+    .collection('taskCompletions')
+    .where('status', '==', 'pending')
+    .where('date', '==', today)
+    .get();
+
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+}
+
+async function approveTask(completionId) {
+  const family = getCurrentFamily();
+  if (!family) throw new Error('Not logged in');
+
+  const member = getCurrentMember();
+  if (!member || !member.isParent) throw new Error('Only parents can approve tasks');
+
+  const docRef = db.collection('families')
+    .doc(family.id)
+    .collection('taskCompletions')
+    .doc(completionId);
+
+  const doc = await docRef.get();
+  if (!doc.exists) throw new Error('Task not found');
+
+  const data = doc.data();
+
+  await docRef.update({
+    status: 'approved',
+    approvedBy: member.id,
+    approvedByName: member.name,
+    approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  // Add kindness for the person who completed it
+  await addKindnessToFirestore(data.completedBy);
+}
+
+async function rejectTask(completionId) {
+  const family = getCurrentFamily();
+  if (!family) throw new Error('Not logged in');
+
+  const member = getCurrentMember();
+  if (!member || !member.isParent) throw new Error('Only parents can reject tasks');
+
+  await db.collection('families')
+    .doc(family.id)
+    .collection('taskCompletions')
+    .doc(completionId)
+    .delete();
 }
 
 async function getCompletedTasksForPetFromFirestore(petId) {
@@ -429,6 +533,61 @@ async function addKindnessToFirestore(memberId) {
 function getKindnessLevel(kindnessData) {
   const total = kindnessData?.total || 0;
   return Math.min(100, (total % 20) * 5 + 5);
+}
+
+// ============================================
+// MEMBER STATS
+// ============================================
+
+async function getMemberStats() {
+  const family = getCurrentFamily();
+  if (!family) return {};
+
+  const today = getTodayKey();
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekAgoKey = weekAgo.toISOString().split('T')[0];
+
+  // Get all task completions
+  const snapshot = await db.collection('families')
+    .doc(family.id)
+    .collection('taskCompletions')
+    .get();
+
+  const stats = {};
+
+  snapshot.docs.forEach(doc => {
+    const data = doc.data();
+    const memberId = data.completedBy;
+    if (!memberId) return;
+
+    if (!stats[memberId]) {
+      stats[memberId] = {
+        today: 0,
+        thisWeek: 0,
+        total: 0,
+        name: data.completedByName || 'Unknown',
+        avatar: data.completedByAvatar || '👤'
+      };
+    }
+
+    stats[memberId].total++;
+
+    if (data.date === today) {
+      stats[memberId].today++;
+    }
+
+    if (data.date >= weekAgoKey) {
+      stats[memberId].thisWeek++;
+    }
+  });
+
+  return stats;
+}
+
+async function getMemberStatsForMember(memberId) {
+  const stats = await getMemberStats();
+  return stats[memberId] || { today: 0, thisWeek: 0, total: 0 };
 }
 
 console.log('Firebase initialized for Happy Pets');

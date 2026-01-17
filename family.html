@@ -35,6 +35,14 @@
       </button>
     </section>
 
+    <!-- Member Stats Section -->
+    <section class="stats-section" id="stats-section">
+      <h2>🌟 Contributions</h2>
+      <div class="stats-grid" id="stats-grid">
+        <p class="loading-stats">Loading stats...</p>
+      </div>
+    </section>
+
     <!-- Add Member Form (hidden by default) -->
     <div id="member-form-popup" class="member-form-popup" style="display: none;">
       <form id="add-member-form" class="form-section">
@@ -129,6 +137,15 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label class="toggle-label">
+            <input type="checkbox" id="is-parent" name="isParent">
+            <span class="toggle-switch"></span>
+            <span class="toggle-text">Parent / Guardian</span>
+          </label>
+          <p class="form-hint">Parents can approve tasks and manage settings</p>
+        </div>
+
         <div class="form-buttons">
           <button type="button" class="cancel-btn" onclick="closeMemberForm()">Cancel</button>
           <button type="submit" class="submit-button">
@@ -184,6 +201,47 @@
         document.getElementById('family-name').textContent = family.name;
       }
       await renderMembers();
+      await renderStats();
+    }
+
+    async function renderStats() {
+      const statsGrid = document.getElementById('stats-grid');
+      const members = await getMembers();
+      const stats = await getMemberStats();
+
+      if (members.length === 0) {
+        statsGrid.innerHTML = '<p class="no-stats">Add family members to see their contributions!</p>';
+        return;
+      }
+
+      let html = '';
+
+      // Sort members by total contributions (highest first)
+      const sortedMembers = members.sort((a, b) => {
+        const aTotal = stats[a.id]?.total || 0;
+        const bTotal = stats[b.id]?.total || 0;
+        return bTotal - aTotal;
+      });
+
+      sortedMembers.forEach(member => {
+        const memberStats = stats[member.id] || { today: 0, thisWeek: 0, total: 0 };
+
+        html += `
+          <div class="stat-card" style="border-left: 4px solid ${member.color}">
+            <div class="stat-avatar" style="background: ${member.color}">${member.avatar}</div>
+            <div class="stat-info">
+              <div class="stat-name">${escapeHtml(member.name)}</div>
+              <div class="stat-numbers">
+                <span class="stat-item"><strong>${memberStats.today}</strong> today</span>
+                <span class="stat-item"><strong>${memberStats.thisWeek}</strong> this week</span>
+                <span class="stat-item"><strong>${memberStats.total}</strong> total</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      statsGrid.innerHTML = html;
     }
 
     async function renderMembers() {
@@ -199,12 +257,13 @@
       let html = '';
       members.forEach(member => {
         const isSelected = currentMember && currentMember.id === member.id;
+        const parentBadge = member.isParent ? '<span class="parent-badge">Parent</span>' : '';
         html += `
-          <div class="member-card ${isSelected ? 'selected' : ''}" onclick="selectMember('${member.id}', '${member.name}', '${member.avatar}')">
+          <div class="member-card ${isSelected ? 'selected' : ''}" onclick="selectMember('${member.id}', '${member.name}', '${member.avatar}', ${member.isParent || false})">
             <div class="member-avatar" style="background: ${member.color}">${member.avatar}</div>
-            <div class="member-name">${escapeHtml(member.name)}</div>
+            <div class="member-name">${escapeHtml(member.name)}${parentBadge}</div>
             ${isSelected ? '<div class="member-check">✓</div>' : ''}
-            <button class="member-edit-btn" onclick="event.stopPropagation(); editMember('${member.id}', '${escapeHtml(member.name)}', '${member.avatar}', '${member.color}')">✎</button>
+            <button class="member-edit-btn" onclick="event.stopPropagation(); editMember('${member.id}', '${escapeHtml(member.name)}', '${member.avatar}', '${member.color}', ${member.isParent || false})">✎</button>
           </div>
         `;
       });
@@ -212,8 +271,8 @@
       grid.innerHTML = html;
     }
 
-    function selectMember(memberId, memberName, memberAvatar) {
-      setCurrentMember(memberId, memberName, memberAvatar);
+    function selectMember(memberId, memberName, memberAvatar, isParent) {
+      setCurrentMember(memberId, memberName, memberAvatar, isParent);
       renderMembers();
     }
 
@@ -224,10 +283,11 @@
       document.getElementById('member-name').value = '';
       document.querySelectorAll('input[name="avatar"]').forEach(r => r.checked = false);
       document.querySelector('input[name="color"][value="#7C9FE8"]').checked = true;
+      document.getElementById('is-parent').checked = false;
       document.getElementById('member-form-popup').style.display = 'block';
     }
 
-    function editMember(memberId, name, avatar, color) {
+    function editMember(memberId, name, avatar, color, isParent) {
       editingMemberId = memberId;
       document.getElementById('form-title').textContent = 'Edit Family Member';
       document.getElementById('submit-text').textContent = 'Save Changes';
@@ -240,6 +300,9 @@
       // Select color
       const colorRadio = document.querySelector(`input[name="color"][value="${color}"]`);
       if (colorRadio) colorRadio.checked = true;
+
+      // Set parent toggle
+      document.getElementById('is-parent').checked = isParent === true || isParent === 'true';
 
       document.getElementById('member-form-popup').style.display = 'block';
     }
@@ -255,15 +318,17 @@
       const name = document.getElementById('member-name').value.trim();
       const avatar = document.querySelector('input[name="avatar"]:checked')?.value || '👤';
       const color = document.querySelector('input[name="color"]:checked')?.value || '#7C9FE8';
+      const isParent = document.getElementById('is-parent').checked;
 
       try {
         if (editingMemberId) {
-          await updateMember(editingMemberId, { name, avatar, color });
+          await updateMember(editingMemberId, { name, avatar, color, isParent });
         } else {
-          await addMember(name, avatar, color);
+          await addMember(name, avatar, color, isParent);
         }
         closeMemberForm();
         await renderMembers();
+        await renderStats();
       } catch (error) {
         alert('Error: ' + error.message);
       }

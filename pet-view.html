@@ -8,7 +8,7 @@
   <link rel="apple-touch-icon" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
   <div class="app">
@@ -187,20 +187,37 @@
           if (!legacyTask) continue;
 
           tasksShown++;
-          const isComplete = await isTaskCompleteInFirestore(pet.id, taskId);
+          const completion = await getTaskCompletionDetails(pet.id, taskId);
+          const isComplete = !!completion;
+          const isPending = completion && completion.status === 'pending';
           const hintText = (pet.taskHints && pet.taskHints[taskId]) || legacyTask.time;
 
+          let statusText = escapeHtml(hintText);
+          let statusClass = '';
+          let checkMark = '';
+
+          if (isPending) {
+            statusText = `Pending approval (${completion.completedByName}) ⏳`;
+            statusClass = 'pending';
+            checkMark = '⏳';
+          } else if (isComplete) {
+            statusText = `Done by ${completion.completedByName} ✨`;
+            statusClass = 'completed';
+            checkMark = '✓';
+          }
+
           html += `
-            <button class="task-button ${isComplete ? 'completed' : ''}"
+            <button class="task-button ${statusClass}"
                     data-task-id="${taskId}"
                     data-hint="${escapeHtml(hintText)}"
+                    data-requires-approval="false"
                     onclick="handleTaskClick(this, '${pet.id}', '${taskId}')">
               <div class="task-icon">${legacyTask.icon}</div>
               <div class="task-content">
                 <div class="task-name">${escapeHtml(legacyTask.name)}</div>
-                <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(hintText)}</div>
+                <div class="task-time">${statusText}</div>
               </div>
-              <div class="task-check">${isComplete ? '✓' : ''}</div>
+              <div class="task-check">${checkMark}</div>
             </button>
           `;
           continue;
@@ -214,20 +231,49 @@
         tasksShown++;
 
         // New format: task data from customTasks
-        const isComplete = await isTaskCompleteInFirestore(pet.id, taskId);
+        const completion = await getTaskCompletionDetails(pet.id, taskId);
+        const isComplete = !!completion;
+        const isPending = completion && completion.status === 'pending';
+        const requiresApproval = taskData.requiresApproval || false;
+        const reminderTime = taskData.reminderTime || '';
+        const overdue = !isComplete && !isPending && isTaskOverdue(reminderTime);
 
         const hint = taskData.details || 'Tap when done!';
+        const timeDisplay = reminderTime ? formatTime(reminderTime) : '';
+
+        let statusText = escapeHtml(hint);
+        let statusClass = '';
+        let checkMark = '';
+
+        if (isPending) {
+          statusText = `Pending approval (${completion.completedByName}) ⏳`;
+          statusClass = 'pending';
+          checkMark = '⏳';
+        } else if (isComplete) {
+          statusText = `Done by ${completion.completedByName} ✨`;
+          statusClass = 'completed';
+          checkMark = '✓';
+        } else if (overdue) {
+          statusClass = 'overdue';
+          statusText = `⚠️ Overdue! Was due at ${timeDisplay}`;
+        } else if (timeDisplay) {
+          statusText = `⏰ ${timeDisplay} • ${escapeHtml(hint)}`;
+        }
+
+        const approvalBadge = requiresApproval ? '<span class="approval-badge">Needs OK</span>' : '';
+
         html += `
-          <button class="task-button ${isComplete ? 'completed' : ''}"
+          <button class="task-button ${statusClass}"
                   data-task-id="${taskId}"
                   data-hint="${escapeHtml(hint)}"
+                  data-requires-approval="${requiresApproval}"
                   onclick="handleTaskClick(this, '${pet.id}', '${taskId}')">
             <div class="task-icon">${taskData.icon}</div>
             <div class="task-content">
-              <div class="task-name">${escapeHtml(taskData.name)}</div>
-              <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(hint)}</div>
+              <div class="task-name">${escapeHtml(taskData.name)}${approvalBadge}</div>
+              <div class="task-time">${statusText}</div>
             </div>
-            <div class="task-check">${isComplete ? '✓' : ''}</div>
+            <div class="task-check">${checkMark}</div>
           </button>
         `;
       }
@@ -240,32 +286,78 @@
     }
 
     async function handleTaskClick(buttonEl, petId, taskId) {
-      // Optimistic UI update - instant feedback
+      const wasPending = buttonEl.classList.contains('pending');
       const wasComplete = buttonEl.classList.contains('completed');
-      const isNowComplete = !wasComplete;
+      const hint = buttonEl.dataset.hint;
+      const requiresApproval = buttonEl.dataset.requiresApproval === 'true';
 
-      // Toggle visual state immediately
-      buttonEl.classList.toggle('completed');
+      // Get current member info
+      const member = getCurrentMember();
+      const memberName = member ? member.name : 'Someone';
+      const isParent = member ? member.isParent : false;
+
       const timeEl = buttonEl.querySelector('.task-time');
       const checkEl = buttonEl.querySelector('.task-check');
-      const hint = buttonEl.dataset.hint;
 
-      if (isNowComplete) {
-        timeEl.textContent = 'Done! ✨';
+      // If pending and parent clicks, they're approving
+      if (wasPending && isParent) {
+        buttonEl.classList.remove('pending');
+        buttonEl.classList.add('completed');
+        timeEl.textContent = `Approved ✨`;
         checkEl.textContent = '✓';
         showCelebration();
-      } else {
-        timeEl.textContent = hint;
-        checkEl.textContent = '';
+
+        toggleTaskInFirestore(petId, taskId, requiresApproval).catch(err => {
+          console.error('Error approving task:', err);
+          buttonEl.classList.remove('completed');
+          buttonEl.classList.add('pending');
+          timeEl.textContent = `Pending approval ⏳`;
+          checkEl.textContent = '⏳';
+        });
+        return;
       }
 
-      // Save to Firestore in background (don't wait)
-      toggleTaskInFirestore(petId, taskId).catch(err => {
+      // If already complete or pending, toggle off
+      if (wasComplete || wasPending) {
+        buttonEl.classList.remove('completed', 'pending');
+        timeEl.textContent = hint;
+        checkEl.textContent = '';
+
+        toggleTaskInFirestore(petId, taskId, requiresApproval).catch(err => {
+          console.error('Error toggling task:', err);
+          // Revert
+          if (wasComplete) {
+            buttonEl.classList.add('completed');
+            timeEl.textContent = `Done by ${memberName} ✨`;
+            checkEl.textContent = '✓';
+          } else {
+            buttonEl.classList.add('pending');
+            timeEl.textContent = `Pending approval ⏳`;
+            checkEl.textContent = '⏳';
+          }
+        });
+        return;
+      }
+
+      // Marking as complete
+      const needsApproval = requiresApproval && !isParent;
+
+      if (needsApproval) {
+        buttonEl.classList.add('pending');
+        timeEl.textContent = `Pending approval (${memberName}) ⏳`;
+        checkEl.textContent = '⏳';
+      } else {
+        buttonEl.classList.add('completed');
+        timeEl.textContent = `Done by ${memberName} ✨`;
+        checkEl.textContent = '✓';
+        showCelebration();
+      }
+
+      toggleTaskInFirestore(petId, taskId, requiresApproval).catch(err => {
         console.error('Error saving task:', err);
-        // Revert on error
-        buttonEl.classList.toggle('completed');
-        timeEl.textContent = wasComplete ? 'Done! ✨' : hint;
-        checkEl.textContent = wasComplete ? '✓' : '';
+        buttonEl.classList.remove('completed', 'pending');
+        timeEl.textContent = hint;
+        checkEl.textContent = '';
       });
     }
 
@@ -288,6 +380,23 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+
+    function formatTime(time24) {
+      if (!time24) return '';
+      const [hours, minutes] = time24.split(':').map(Number);
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const hours12 = hours % 12 || 12;
+      return `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+    }
+
+    function isTaskOverdue(reminderTime) {
+      if (!reminderTime) return false;
+      const now = new Date();
+      const [hours, minutes] = reminderTime.split(':').map(Number);
+      const taskTime = new Date();
+      taskTime.setHours(hours, minutes, 0, 0);
+      return now > taskTime;
     }
 
     function lightenColor(hex) {

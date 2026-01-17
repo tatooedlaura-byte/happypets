@@ -8,8 +8,8 @@
   <link rel="apple-touch-icon" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="styles.css?v=7">
-  <link rel="stylesheet" href="forms.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=9">
+  <link rel="stylesheet" href="forms.css?v=5">
 </head>
 <body>
   <div class="app">
@@ -105,6 +105,9 @@
               <label>Details <span class="optional">(optional)</span></label>
               <input type="text" id="task-form-details" placeholder="e.g., 1 cup of kibble">
 
+              <label>Reminder Time <span class="optional">(optional)</span></label>
+              <input type="time" id="task-form-time" placeholder="When should this be done?">
+
               <label>Schedule</label>
               <div class="schedule-toggle">
                 <button type="button" class="schedule-btn active" data-value="daily" onclick="setSchedule('daily')">Daily</button>
@@ -120,6 +123,15 @@
                 <label class="day-option"><input type="checkbox" name="days" value="4"><span>Thu</span></label>
                 <label class="day-option"><input type="checkbox" name="days" value="5"><span>Fri</span></label>
                 <label class="day-option"><input type="checkbox" name="days" value="6"><span>Sat</span></label>
+              </div>
+
+              <div class="form-group" style="margin-top: 12px;">
+                <label class="toggle-label">
+                  <input type="checkbox" id="task-requires-approval" name="requiresApproval">
+                  <span class="toggle-switch"></span>
+                  <span class="toggle-text">Needs Parent OK</span>
+                </label>
+                <p class="form-hint" style="margin-top: 4px; font-size: 11px;">Parents must approve when kids complete this task</p>
               </div>
             </div>
             <div class="task-form-buttons">
@@ -267,6 +279,8 @@
       // Reset schedule to daily
       setSchedule('daily');
       document.querySelectorAll('input[name="days"]').forEach(cb => cb.checked = false);
+      document.getElementById('task-requires-approval').checked = false;
+      document.getElementById('task-form-time').value = '';
 
       document.getElementById('task-form-popup').style.display = 'block';
       document.getElementById('task-form-name').focus();
@@ -295,6 +309,12 @@
       document.querySelectorAll('input[name="days"]').forEach(cb => {
         cb.checked = task.days && task.days.includes(parseInt(cb.value));
       });
+
+      // Set approval toggle
+      document.getElementById('task-requires-approval').checked = task.requiresApproval || false;
+
+      // Set time
+      document.getElementById('task-form-time').value = task.reminderTime || '';
 
       document.getElementById('task-form-popup').style.display = 'block';
       document.getElementById('task-form-name').focus();
@@ -329,6 +349,8 @@
       const schedule = document.getElementById('schedule-value').value;
       const dayCheckboxes = document.querySelectorAll('input[name="days"]:checked');
       const days = Array.from(dayCheckboxes).map(cb => parseInt(cb.value));
+      const requiresApproval = document.getElementById('task-requires-approval').checked;
+      const reminderTime = document.getElementById('task-form-time').value || '';
 
       if (editingTaskId) {
         // Update existing task
@@ -338,6 +360,8 @@
           task.details = details;
           task.schedule = schedule;
           task.days = schedule === 'weekly' ? days : [];
+          task.requiresApproval = requiresApproval;
+          task.reminderTime = reminderTime;
         }
       } else {
         // Create new task
@@ -348,7 +372,9 @@
           name,
           details,
           schedule,
-          days: schedule === 'weekly' ? days : []
+          days: schedule === 'weekly' ? days : [],
+          requiresApproval,
+          reminderTime
         });
       }
 
@@ -362,6 +388,14 @@
     // ============================================
 
     const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    function formatTime(time24) {
+      if (!time24) return '';
+      const [hours, minutes] = time24.split(':').map(Number);
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const hours12 = hours % 12 || 12;
+      return `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+    }
 
     function getScheduleLabel(task) {
       if (!task.schedule || task.schedule === 'daily') {
@@ -384,13 +418,15 @@
       let html = '';
       tasks.forEach((task, index) => {
         const scheduleLabel = getScheduleLabel(task);
+        const approvalBadge = task.requiresApproval ? '<span class="approval-badge">Needs OK</span>' : '';
+        const timeLabel = task.reminderTime ? `⏰ ${formatTime(task.reminderTime)}` : '';
         html += `
           <div class="task-list-item">
             <span class="task-list-icon">${task.icon}</span>
             <div class="task-list-info" onclick="editTask('${task.id}')">
-              <div class="task-list-name">${escapeHtml(task.name)}</div>
+              <div class="task-list-name">${escapeHtml(task.name)}${approvalBadge}</div>
               <div class="task-list-details">${escapeHtml(task.details || 'Tap when done!')}</div>
-              <div class="task-list-schedule">📅 ${scheduleLabel}</div>
+              <div class="task-list-schedule">📅 ${scheduleLabel}${timeLabel ? ' • ' + timeLabel : ''}</div>
             </div>
             <button type="button" class="task-edit-btn" onclick="editTask('${task.id}')">✎</button>
             <button type="button" class="task-delete-btn" onclick="deleteTask('${task.id}')">×</button>
