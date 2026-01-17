@@ -37,15 +37,19 @@ function setCurrentFamily(familyId, familyName) {
 function clearCurrentFamily() {
   sessionStorage.removeItem('happypets_familyId');
   sessionStorage.removeItem('happypets_familyName');
-  sessionStorage.removeItem('happypets_memberId');
-  sessionStorage.removeItem('happypets_memberName');
+  // Also clear member from localStorage when logging out
+  localStorage.removeItem('happypets_memberId');
+  localStorage.removeItem('happypets_memberName');
+  localStorage.removeItem('happypets_memberAvatar');
+  localStorage.removeItem('happypets_memberIsParent');
 }
 
 function getCurrentMember() {
-  const memberId = sessionStorage.getItem('happypets_memberId');
-  const memberName = sessionStorage.getItem('happypets_memberName');
-  const memberAvatar = sessionStorage.getItem('happypets_memberAvatar');
-  const isParent = sessionStorage.getItem('happypets_memberIsParent') === 'true';
+  // Use localStorage so member selection persists between sessions
+  const memberId = localStorage.getItem('happypets_memberId');
+  const memberName = localStorage.getItem('happypets_memberName');
+  const memberAvatar = localStorage.getItem('happypets_memberAvatar');
+  const isParent = localStorage.getItem('happypets_memberIsParent') === 'true';
   if (memberId && memberName) {
     return { id: memberId, name: memberName, avatar: memberAvatar || '👤', isParent };
   }
@@ -53,14 +57,15 @@ function getCurrentMember() {
 }
 
 function setCurrentMember(memberId, memberName, memberAvatar, isParent) {
-  sessionStorage.setItem('happypets_memberId', memberId);
-  sessionStorage.setItem('happypets_memberName', memberName);
-  sessionStorage.setItem('happypets_memberAvatar', memberAvatar || '👤');
-  sessionStorage.setItem('happypets_memberIsParent', isParent ? 'true' : 'false');
+  // Use localStorage so member selection persists between sessions
+  localStorage.setItem('happypets_memberId', memberId);
+  localStorage.setItem('happypets_memberName', memberName);
+  localStorage.setItem('happypets_memberAvatar', memberAvatar || '👤');
+  localStorage.setItem('happypets_memberIsParent', isParent ? 'true' : 'false');
 }
 
 function isCurrentMemberParent() {
-  return sessionStorage.getItem('happypets_memberIsParent') === 'true';
+  return localStorage.getItem('happypets_memberIsParent') === 'true';
 }
 
 // ============================================

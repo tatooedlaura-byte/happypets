@@ -48,12 +48,14 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js?v=2"></script>
+  <script src="firebase-config.js?v=3"></script>
   <script>
     // Check if already logged in
     const family = getCurrentFamily();
     if (family) {
-      window.location.href = 'index.html';
+      // Already logged in - go to Today if member selected, otherwise Family
+      const member = getCurrentMember();
+      window.location.href = member ? 'today.html' : 'family.html';
     }
 
     document.getElementById('login-form').addEventListener('submit', async function(e) {
@@ -71,14 +73,19 @@
       try {
         await login(username, password);
 
-        // Check if family has members
+        // Check if family has members and if member is already selected
         const members = await getMembers();
+        const currentMember = getCurrentMember();
+
         if (members.length === 0) {
           // No members yet, go to family setup
           window.location.href = 'family.html';
+        } else if (currentMember) {
+          // Member already selected, go straight to Today
+          window.location.href = 'today.html';
         } else {
-          // Has members, go to member selection or home
-          window.location.href = 'index.html';
+          // Has members but none selected, go to family to pick
+          window.location.href = 'family.html';
         }
       } catch (error) {
         errorDiv.textContent = error.message;

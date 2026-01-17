@@ -59,12 +59,13 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js?v=2"></script>
+  <script src="firebase-config.js?v=3"></script>
   <script>
     // Check if already logged in
     const family = getCurrentFamily();
     if (family) {
-      window.location.href = 'index.html';
+      const member = getCurrentMember();
+      window.location.href = member ? 'today.html' : 'family.html';
     }
 
     document.getElementById('signup-form').addEventListener('submit', async function(e) {

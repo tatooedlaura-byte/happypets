@@ -171,7 +171,7 @@
 
       <button type="submit" class="submit-button" disabled>
         <span>Loading...</span>
-        <span class="button-icon">✓</span>
+        <span class="button-icon">←</span>
       </button>
 
       <button type="button" class="delete-button" onclick="confirmDelete()">
@@ -203,7 +203,7 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js?v=2"></script>
+  <script src="firebase-config.js?v=3"></script>
   <script src="app.js?v=8"></script>
   <script>
     // Collapsible sections
@@ -262,7 +262,7 @@
         // Enable save button now that pet is loaded
         const submitBtn = document.querySelector('.submit-button');
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Save Changes</span><span class="button-icon">✓</span>';
+        submitBtn.innerHTML = '<span>Done</span><span class="button-icon">←</span>';
       } catch (error) {
         console.error('Error loading pet:', error);
         alert('Error loading pet: ' + error.message);
@@ -348,9 +348,10 @@
       document.getElementById('day-picker').classList.toggle('visible', isWeekly);
     }
 
-    function submitTaskForm() {
+    async function submitTaskForm() {
       const nameInput = document.getElementById('task-form-name');
       const detailsInput = document.getElementById('task-form-details');
+      const addBtn = document.querySelector('.task-form-add');
 
       const name = nameInput.value.trim() || currentFormType;
       const details = detailsInput.value.trim() || 'Tap when done!';
@@ -388,9 +389,23 @@
         });
       }
 
-      renderTasksList();
-      renderTaskOrderList();
-      closeTaskForm();
+      // Auto-save to Firestore
+      addBtn.textContent = 'Saving...';
+      addBtn.disabled = true;
+      try {
+        const taskIds = tasks.map(t => t.id);
+        await updatePetInFirestore(currentPetId, {
+          tasks: taskIds,
+          customTasks: tasks
+        });
+        renderTasksList();
+        renderTaskOrderList();
+        closeTaskForm();
+      } catch (error) {
+        alert('Error saving: ' + error.message);
+        addBtn.textContent = editingTaskId ? 'Save Changes' : 'Add Task';
+        addBtn.disabled = false;
+      }
     }
 
     // ============================================
@@ -447,10 +462,23 @@
       container.innerHTML = html;
     }
 
-    function deleteTask(taskId) {
+    async function deleteTask(taskId) {
+      if (!confirm('Delete this task?')) return;
+
       tasks = tasks.filter(t => t.id !== taskId);
       renderTasksList();
       renderTaskOrderList();
+
+      // Auto-save
+      try {
+        const taskIds = tasks.map(t => t.id);
+        await updatePetInFirestore(currentPetId, {
+          tasks: taskIds,
+          customTasks: tasks
+        });
+      } catch (error) {
+        alert('Error saving: ' + error.message);
+      }
     }
 
     // ============================================
@@ -486,7 +514,7 @@
       container.innerHTML = html;
     }
 
-    function moveTask(index, direction) {
+    async function moveTask(index, direction) {
       const newIndex = index + direction;
       if (newIndex < 0 || newIndex >= tasks.length) return;
 
@@ -494,6 +522,17 @@
       [tasks[index], tasks[newIndex]] = [tasks[newIndex], tasks[index]];
       renderTasksList();
       renderTaskOrderList();
+
+      // Auto-save
+      try {
+        const taskIds = tasks.map(t => t.id);
+        await updatePetInFirestore(currentPetId, {
+          tasks: taskIds,
+          customTasks: tasks
+        });
+      } catch (error) {
+        alert('Error saving: ' + error.message);
+      }
     }
 
     // ============================================
@@ -503,38 +542,30 @@
     async function confirmDelete() {
       if (confirm('Are you sure you want to remove this pet? This cannot be undone.')) {
         await deletePetFromFirestore(currentPetId);
-        window.location.href = 'index.html';
+        window.location.href = 'today.html';
       }
     }
 
-    document.getElementById('edit-pet-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
+    // Auto-save name and breed on blur
+    document.getElementById('pet-name').addEventListener('blur', autoSaveBasicInfo);
+    document.getElementById('pet-breed').addEventListener('blur', autoSaveBasicInfo);
 
-      const submitBtn = document.querySelector('.submit-button');
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>Saving...</span>';
-
+    async function autoSaveBasicInfo() {
       const name = document.getElementById('pet-name').value.trim();
       const breed = document.getElementById('pet-breed').value.trim();
-
-      // Build task IDs array from tasks
-      const taskIds = tasks.map(t => t.id);
+      if (!name) return; // Don't save empty name
 
       try {
-        // Update pet - store all task data in customTasks
-        await updatePetInFirestore(currentPetId, {
-          name,
-          breed,
-          tasks: taskIds,
-          customTasks: tasks
-        });
-
-        window.location.href = `pet-view.html?id=${currentPetId}`;
+        await updatePetInFirestore(currentPetId, { name, breed });
       } catch (error) {
-        alert('Error saving: ' + error.message);
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Save Changes</span><span class="button-icon">✓</span>';
+        console.error('Error auto-saving:', error);
       }
+    }
+
+    // Done button - just navigate back (everything auto-saves)
+    document.getElementById('edit-pet-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      window.location.href = `pet-view.html?id=${currentPetId}`;
     });
   </script>
 </body>

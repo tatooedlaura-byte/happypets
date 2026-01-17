@@ -149,7 +149,7 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js?v=2"></script>
+  <script src="firebase-config.js?v=3"></script>
   <script src="app.js?v=7"></script>
   <script>
     // Check auth
@@ -171,8 +171,9 @@
       const tasks = Array.from(taskCheckboxes).map(cb => cb.value);
 
       try {
-        await addPetToFirestore({ name, type, breed, tasks });
-        window.location.href = 'index.html';
+        const newPet = await addPetToFirestore({ name, type, breed, tasks });
+        // Go directly to edit page to add tasks/chores
+        window.location.href = `edit-pet.html?id=${newPet.id}`;
       } catch (error) {
         alert('Error adding pet: ' + error.message);
         submitBtn.disabled = false;
