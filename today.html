@@ -8,8 +8,66 @@
   <link rel="apple-touch-icon" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="styles.css?v=20">
-  <link rel="stylesheet" href="forms.css?v=20">
+  <link rel="stylesheet" href="styles.css?v=22">
+  <link rel="stylesheet" href="forms.css?v=22">
+  <style>
+    .pick-user-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .pick-user-modal {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+    }
+    .pick-user-modal h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+    .pick-user-modal p {
+      color: var(--text-light);
+      margin-bottom: 20px;
+      font-size: 15px;
+    }
+    .pick-user-modal select {
+      width: 100%;
+      padding: 15px;
+      font-size: 18px;
+      border: 2px solid var(--primary);
+      border-radius: 12px;
+      background: var(--background);
+      color: var(--text);
+      margin-bottom: 15px;
+    }
+    .pick-user-modal .go-btn {
+      width: 100%;
+      padding: 15px;
+      background: var(--primary);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .pick-user-modal .go-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -32,6 +90,18 @@
         </select>
       </div>
     </header>
+
+    <!-- Pick User Modal -->
+    <div id="pick-user-overlay" class="pick-user-overlay" style="display: none;">
+      <div class="pick-user-modal">
+        <h2>Who's helping today?</h2>
+        <p>Pick your name so we know who did the tasks!</p>
+        <select id="pick-user-select">
+          <option value="">Choose your name...</option>
+        </select>
+        <button class="go-btn" id="pick-user-go" disabled onclick="confirmUserPick()">Let's Go!</button>
+      </div>
+    </div>
 
     <!-- All Tasks -->
     <main class="today-tasks" id="today-tasks">
@@ -81,7 +151,46 @@
     async function init() {
       document.getElementById('today-date').textContent = formatDate();
       await loadUserDropdown();
+
+      // Check if user is selected - if not, show picker modal
+      const currentMember = getCurrentMember();
+      if (!currentMember && membersData.length > 0) {
+        showUserPicker();
+      }
+
       await renderTodayTasksAsync();
+    }
+
+    function showUserPicker() {
+      const overlay = document.getElementById('pick-user-overlay');
+      const select = document.getElementById('pick-user-select');
+      const goBtn = document.getElementById('pick-user-go');
+
+      let html = '<option value="">Choose your name...</option>';
+      membersData.forEach(member => {
+        html += `<option value="${member.id}">${member.avatar} ${member.name}</option>`;
+      });
+      select.innerHTML = html;
+
+      select.onchange = function() {
+        goBtn.disabled = !this.value;
+      };
+
+      overlay.style.display = 'flex';
+    }
+
+    function confirmUserPick() {
+      const select = document.getElementById('pick-user-select');
+      const memberId = select.value;
+      if (!memberId) return;
+
+      const member = membersData.find(m => m.id === memberId);
+      if (member) {
+        setCurrentMember(member.id, member.name, member.avatar, member.isParent || false);
+        document.getElementById('pick-user-overlay').style.display = 'none';
+        // Update the header dropdown too
+        document.getElementById('user-dropdown').value = memberId;
+      }
     }
 
     async function loadUserDropdown() {
@@ -99,7 +208,11 @@
     }
 
     function switchUser(memberId) {
-      if (!memberId) return;
+      if (!memberId) {
+        // If they deselect, show the picker again
+        showUserPicker();
+        return;
+      }
 
       const member = membersData.find(m => m.id === memberId);
       if (member) {
@@ -252,6 +365,13 @@
 
     // Handle task click from Today view - optimistic UI update
     async function handleTodayTaskClick(buttonEl, petId, taskId) {
+      // Must have a user selected
+      const currentMember = getCurrentMember();
+      if (!currentMember) {
+        showUserPicker();
+        return;
+      }
+
       const wasComplete = buttonEl.classList.contains('completed');
       const wasOverdue = buttonEl.classList.contains('overdue');
       const isNowComplete = !wasComplete;
@@ -269,7 +389,7 @@
       const timeDisplay = reminderTime ? formatTime(reminderTime) : '';
 
       if (isNowComplete) {
-        timeEl.textContent = 'Done! ✨';
+        timeEl.textContent = `Done by ${currentMember.name} ✨`;
         checkEl.textContent = '✓';
         showCelebration();
       } else {
