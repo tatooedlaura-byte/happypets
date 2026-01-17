@@ -64,8 +64,8 @@
     // Check if already logged in
     const family = getCurrentFamily();
     if (family) {
-      const member = getCurrentMember();
-      window.location.href = member ? 'today.html' : 'family.html';
+      // Already logged in - go to Today
+      window.location.href = 'today.html';
     }
 
     document.getElementById('signup-form').addEventListener('submit', async function(e) {

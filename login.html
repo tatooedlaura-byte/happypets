@@ -53,9 +53,8 @@
     // Check if already logged in
     const family = getCurrentFamily();
     if (family) {
-      // Already logged in - go to Today if member selected, otherwise Family
-      const member = getCurrentMember();
-      window.location.href = member ? 'today.html' : 'family.html';
+      // Already logged in - go to Today (can pick member from dropdown there)
+      window.location.href = 'today.html';
     }
 
     document.getElementById('login-form').addEventListener('submit', async function(e) {
@@ -80,12 +79,9 @@
         if (members.length === 0) {
           // No members yet, go to family setup
           window.location.href = 'family.html';
-        } else if (currentMember) {
-          // Member already selected, go straight to Today
-          window.location.href = 'today.html';
         } else {
-          // Has members but none selected, go to family to pick
-          window.location.href = 'family.html';
+          // Go to Today - can pick member from dropdown there
+          window.location.href = 'today.html';
         }
       } catch (error) {
         errorDiv.textContent = error.message;
