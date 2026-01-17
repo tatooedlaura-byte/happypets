@@ -5,553 +5,661 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Pet - Happy Pets</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="styles.css?v=10">
-  <link rel="stylesheet" href="forms.css?v=8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F0EB;
+      --card: #FFFFFF;
+      --primary: #7C9FE8;
+      --accent: #95D5B2;
+      --text: #4A4A4A;
+      --text-light: #8A8A8A;
+      --danger: #E88A9E;
+      --shadow: rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 30px;
+    }
+
+    /* Header */
+    .header {
+      background: var(--card);
+      padding: 20px;
+      padding-top: 50px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      background: var(--bg);
+      border: none;
+      border-radius: 10px;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .header-info {
+      flex: 1;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .header-sub {
+      font-size: 14px;
+      color: var(--text-light);
+    }
+
+    .pet-icon {
+      font-size: 36px;
+    }
+
+    /* Main */
+    .main {
+      padding: 20px;
+    }
+
+    /* Form groups */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-family: inherit;
+      background: var(--card);
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Section headers */
+    .section-header {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-light);
+      margin: 25px 0 12px;
+      padding-left: 4px;
+    }
+
+    /* Task type grid */
+    .task-types {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .task-type-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 8px;
+      background: var(--card);
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .task-type-btn:active {
+      border-color: var(--primary);
+      background: rgba(124, 159, 232, 0.1);
+    }
+
+    .task-type-icon {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .task-type-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Task list */
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card);
+      padding: 14px 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .task-item-icon {
+      font-size: 24px;
+    }
+
+    .task-item-info {
+      flex: 1;
+    }
+
+    .task-item-name {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .task-item-detail {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .task-item-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .task-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .task-btn-edit {
+      background: rgba(124, 159, 232, 0.15);
+      color: var(--primary);
+    }
+
+    .task-btn-delete {
+      background: rgba(232, 138, 158, 0.15);
+      color: var(--danger);
+    }
+
+    .empty-tasks {
+      text-align: center;
+      padding: 30px;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    /* Delete pet button */
+    .delete-pet-btn {
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      border: 2px solid var(--danger);
+      border-radius: 12px;
+      color: var(--danger);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 30px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 25px;
+      max-width: 360px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-icon {
+      font-size: 28px;
+    }
+
+    /* Schedule toggle */
+    .schedule-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .schedule-btn {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      background: var(--bg);
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--text);
+    }
+
+    .schedule-btn.active {
+      border-color: var(--primary);
+      background: rgba(124, 159, 232, 0.15);
+      color: var(--primary);
+    }
+
+    /* Days picker */
+    .days-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 15px;
+    }
+
+    .day-btn {
+      flex: 1;
+      padding: 8px 4px;
+      border: 2px solid #e0e0e0;
+      background: var(--bg);
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--text);
+    }
+
+    .day-btn.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .btn-cancel {
+      background: #f0f0f0;
+      color: var(--text);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+  </style>
 </head>
 <body>
-  <div class="app">
-    <!-- Header -->
-    <header class="pet-header" id="edit-header" style="background: linear-gradient(135deg, #7C9FE8 0%, #B8D4F1 100%);">
-      <a href="settings.html" class="back-button" id="back-button">←</a>
-      <div class="pet-avatar" id="pet-avatar">🐾</div>
-      <h1 class="pet-name">Edit Pet</h1>
-      <p class="pet-type" id="pet-type-display"></p>
-    </header>
+  <!-- Header -->
+  <header class="header">
+    <a href="settings.html" class="back-btn" id="back-btn">←</a>
+    <div class="header-info">
+      <h1 id="pet-name-display">Edit Pet</h1>
+      <div class="header-sub" id="pet-type-display"></div>
+    </div>
+    <span class="pet-icon" id="pet-icon">🐾</span>
+  </header>
 
-    <!-- Edit Pet Form -->
-    <form id="edit-pet-form" class="form-section">
-      <!-- Basic Info - Always visible -->
-      <div class="form-group">
-        <label for="pet-name">Pet's Name</label>
-        <input type="text" id="pet-name" placeholder="What's their name?" required>
-      </div>
+  <main class="main">
+    <!-- Pet Name -->
+    <div class="form-group">
+      <label>Pet's Name</label>
+      <input type="text" id="pet-name" placeholder="What's their name?">
+    </div>
 
-      <div class="form-group">
-        <label for="pet-breed">Breed (optional)</label>
-        <input type="text" id="pet-breed" placeholder="e.g., Golden Retriever">
-      </div>
-
-      <!-- Add Tasks Section -->
-      <div class="collapsible-section open">
-        <button type="button" class="collapsible-header" onclick="toggleSection(this)">
-          <span>➕ Add Tasks</span>
-          <span class="collapse-icon">▼</span>
-        </button>
-        <div class="collapsible-content">
-          <p class="form-hint">Tap a task type to add it:</p>
-          <div class="task-type-grid" id="task-type-grid">
-            <button type="button" class="task-type-btn" onclick="openTaskForm('🥣', 'Food', 'e.g., 1 cup of kibble')">
-              <span class="task-type-icon">🥣</span>
-              <span class="task-type-label">Food</span>
-            </button>
-            <button type="button" class="task-type-btn" onclick="openTaskForm('💧', 'Water', 'e.g., Fresh bowl')">
-              <span class="task-type-icon">💧</span>
-              <span class="task-type-label">Water</span>
-            </button>
-            <button type="button" class="task-type-btn" onclick="openTaskForm('🚶', 'Walk', 'e.g., 3 laps around block')">
-              <span class="task-type-icon">🚶</span>
-              <span class="task-type-label">Walk</span>
-            </button>
-            <button type="button" class="task-type-btn" onclick="openTaskForm('🎾', 'Play', 'e.g., 10 min fetch')">
-              <span class="task-type-icon">🎾</span>
-              <span class="task-type-label">Play</span>
-            </button>
-            <button type="button" class="task-type-btn" onclick="openTaskForm('🪥', 'Brush', 'e.g., Full coat')">
-              <span class="task-type-icon">🪥</span>
-              <span class="task-type-label">Brush</span>
-            </button>
-            <button type="button" class="task-type-btn" onclick="openTaskForm('🧹', 'Clean', 'e.g., Litter box')">
-              <span class="task-type-icon">🧹</span>
-              <span class="task-type-label">Clean</span>
-            </button>
-            <button type="button" class="task-type-btn" onclick="openTaskForm('💊', 'Medicine', 'e.g., 1 pill with food')">
-              <span class="task-type-icon">💊</span>
-              <span class="task-type-label">Medicine</span>
-            </button>
-            <button type="button" class="task-type-btn" onclick="openTaskForm('👀', 'Check', 'e.g., Eyes, ears, nose')">
-              <span class="task-type-icon">👀</span>
-              <span class="task-type-label">Check</span>
-            </button>
-            <button type="button" class="task-type-btn" onclick="openTaskForm('🛁', 'Bath', 'e.g., Full wash')">
-              <span class="task-type-icon">🛁</span>
-              <span class="task-type-label">Bath</span>
-            </button>
-            <button type="button" class="task-type-btn" onclick="openTaskForm('✂️', 'Groom', 'e.g., Trim nails')">
-              <span class="task-type-icon">✂️</span>
-              <span class="task-type-label">Groom</span>
-            </button>
-            <button type="button" class="task-type-btn" onclick="openTaskForm('🚗', 'Trip', 'e.g., Vet visit')">
-              <span class="task-type-icon">🚗</span>
-              <span class="task-type-label">Trip</span>
-            </button>
-            <button type="button" class="task-type-btn" onclick="openTaskForm('📌', 'Other', 'Describe the task')">
-              <span class="task-type-icon">📌</span>
-              <span class="task-type-label">Other</span>
-            </button>
-          </div>
-
-          <!-- Task Form Popup -->
-          <div id="task-form-popup" class="task-form-popup" style="display: none;">
-            <div class="task-form-header">
-              <span id="task-form-icon" class="task-form-icon">🥣</span>
-              <span id="task-form-type" class="task-form-type">Food</span>
-            </div>
-            <div class="task-form-fields">
-              <label>Task Name</label>
-              <input type="text" id="task-form-name" placeholder="e.g., Breakfast">
-              <label>Details <span class="optional">(optional)</span></label>
-              <input type="text" id="task-form-details" placeholder="e.g., 1 cup of kibble">
-
-              <label>Reminder Time <span class="optional">(optional)</span></label>
-              <input type="time" id="task-form-time" placeholder="When should this be done?">
-
-              <label>Schedule</label>
-              <div class="schedule-toggle">
-                <button type="button" class="schedule-btn active" data-value="daily" onclick="setSchedule('daily')">Daily</button>
-                <button type="button" class="schedule-btn" data-value="weekly" onclick="setSchedule('weekly')">Certain days</button>
-              </div>
-              <input type="hidden" name="schedule" id="schedule-value" value="daily">
-
-              <div id="day-picker" class="day-picker">
-                <label class="day-option"><input type="checkbox" name="days" value="0"><span>Sun</span></label>
-                <label class="day-option"><input type="checkbox" name="days" value="1"><span>Mon</span></label>
-                <label class="day-option"><input type="checkbox" name="days" value="2"><span>Tue</span></label>
-                <label class="day-option"><input type="checkbox" name="days" value="3"><span>Wed</span></label>
-                <label class="day-option"><input type="checkbox" name="days" value="4"><span>Thu</span></label>
-                <label class="day-option"><input type="checkbox" name="days" value="5"><span>Fri</span></label>
-                <label class="day-option"><input type="checkbox" name="days" value="6"><span>Sat</span></label>
-              </div>
-
-              <div class="form-group" style="margin-top: 12px;">
-                <label class="toggle-label">
-                  <input type="checkbox" id="task-requires-approval" name="requiresApproval">
-                  <span class="toggle-switch"></span>
-                  <span class="toggle-text">Needs Parent OK</span>
-                </label>
-                <p class="form-hint" style="margin-top: 4px; font-size: 11px;">Parents must approve when kids complete this task</p>
-              </div>
-            </div>
-            <div class="task-form-buttons">
-              <button type="button" class="task-form-cancel" onclick="closeTaskForm()">Cancel</button>
-              <button type="button" class="task-form-add" onclick="submitTaskForm()">Add Task</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Current Tasks List -->
-      <div class="collapsible-section open" id="current-tasks-section">
-        <button type="button" class="collapsible-header" onclick="toggleSection(this)">
-          <span>📋 Current Tasks</span>
-          <span class="collapse-icon">▼</span>
-        </button>
-        <div class="collapsible-content">
-          <div id="tasks-list" class="tasks-list">
-            <p class="empty-tasks">No tasks yet. Tap a task type above to add one.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Collapsible: Task Order -->
-      <div class="collapsible-section" id="task-order-section" style="display: none;">
-        <button type="button" class="collapsible-header" onclick="toggleSection(this)">
-          <span>↕️ Reorder Tasks</span>
-          <span class="collapse-icon">▼</span>
-        </button>
-        <div class="collapsible-content">
-          <p class="form-hint">Use arrows to change order</p>
-          <div id="task-order-list" class="task-order-list">
-            <!-- Ordered tasks rendered by JavaScript -->
-          </div>
-        </div>
-      </div>
-
-      <button type="submit" class="submit-button" disabled>
-        <span>Loading...</span>
-        <span class="button-icon">←</span>
+    <!-- Add Tasks -->
+    <div class="section-header">Add Tasks</div>
+    <div class="task-types">
+      <button class="task-type-btn" onclick="openTaskModal('🥣', 'Food')">
+        <span class="task-type-icon">🥣</span>
+        <span class="task-type-label">Food</span>
       </button>
-
-      <button type="button" class="delete-button" onclick="confirmDelete()">
-        Remove This Pet
+      <button class="task-type-btn" onclick="openTaskModal('💧', 'Water')">
+        <span class="task-type-icon">💧</span>
+        <span class="task-type-label">Water</span>
       </button>
-    </form>
+      <button class="task-type-btn" onclick="openTaskModal('🚶', 'Walk')">
+        <span class="task-type-icon">🚶</span>
+        <span class="task-type-label">Walk</span>
+      </button>
+      <button class="task-type-btn" onclick="openTaskModal('🎾', 'Play')">
+        <span class="task-type-icon">🎾</span>
+        <span class="task-type-label">Play</span>
+      </button>
+      <button class="task-type-btn" onclick="openTaskModal('🪥', 'Brush')">
+        <span class="task-type-icon">🪥</span>
+        <span class="task-type-label">Brush</span>
+      </button>
+      <button class="task-type-btn" onclick="openTaskModal('🧹', 'Clean')">
+        <span class="task-type-icon">🧹</span>
+        <span class="task-type-label">Clean</span>
+      </button>
+      <button class="task-type-btn" onclick="openTaskModal('💊', 'Medicine')">
+        <span class="task-type-icon">💊</span>
+        <span class="task-type-label">Medicine</span>
+      </button>
+      <button class="task-type-btn" onclick="openTaskModal('📌', 'Other')">
+        <span class="task-type-icon">📌</span>
+        <span class="task-type-label">Other</span>
+      </button>
+    </div>
 
+    <!-- Current Tasks -->
+    <div class="section-header">Current Tasks</div>
+    <div class="task-list" id="task-list">
+      <div class="empty-tasks">No tasks yet</div>
+    </div>
+
+    <!-- Delete Pet -->
+    <button class="delete-pet-btn" onclick="deletePet()">Delete This Pet</button>
+  </main>
+
+  <!-- Task Modal -->
+  <div class="modal-overlay" id="task-modal" style="display: none;">
+    <div class="modal">
+      <h2><span class="modal-icon" id="modal-icon">🥣</span><span id="modal-title">Add Task</span></h2>
+
+      <div class="form-group">
+        <label>Task Name</label>
+        <input type="text" id="task-name" placeholder="e.g., Breakfast">
+      </div>
+
+      <div class="form-group">
+        <label>Details (optional)</label>
+        <input type="text" id="task-details" placeholder="e.g., 1 cup of kibble">
+      </div>
+
+      <div class="form-group">
+        <label>Schedule</label>
+        <div class="schedule-row">
+          <button class="schedule-btn active" id="schedule-daily" onclick="setSchedule('daily')">Daily</button>
+          <button class="schedule-btn" id="schedule-weekly" onclick="setSchedule('weekly')">Certain Days</button>
+        </div>
+        <div class="days-row" id="days-row" style="display: none;">
+          <button class="day-btn" data-day="0">Su</button>
+          <button class="day-btn" data-day="1">Mo</button>
+          <button class="day-btn" data-day="2">Tu</button>
+          <button class="day-btn" data-day="3">We</button>
+          <button class="day-btn" data-day="4">Th</button>
+          <button class="day-btn" data-day="5">Fr</button>
+          <button class="day-btn" data-day="6">Sa</button>
+        </div>
+      </div>
+
+      <input type="hidden" id="editing-task-id">
+
+      <div class="btn-row">
+        <button class="btn btn-cancel" onclick="closeTaskModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTask()">Save</button>
+      </div>
+    </div>
   </div>
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js?v=3"></script>
-  <script src="app.js?v=8"></script>
+  <script src="firebase-config.js?v=30"></script>
+  <script src="app.js?v=30"></script>
   <script>
-    // Collapsible sections
-    function toggleSection(button) {
-      const section = button.closest('.collapsible-section');
-      section.classList.toggle('open');
-    }
-
-    let currentPetId = null;
-    let tasks = []; // All tasks are now stored here
-    let currentFormIcon = '';
-    let currentFormType = '';
-    let editingTaskId = null; // Track if we're editing an existing task
-
-    // Check auth
     if (!requireAuth()) {
-      // Redirect handled by requireAuth
+      // Redirect handled
     } else {
-      initAsync();
+      init();
     }
 
-    async function initAsync() {
-      try {
-        currentPetId = getUrlParam('id');
-        if (!currentPetId || currentPetId.trim() === '') {
-          window.location.href = 'index.html';
-          return;
-        }
+    let petId = null;
+    let petData = null;
+    let tasks = [];
+    let currentIcon = '📌';
+    let currentSchedule = 'daily';
 
-        const pet = await getPetFromFirestore(currentPetId);
-        if (!pet) {
-          window.location.href = 'index.html';
-          return;
-        }
+    async function init() {
+      petId = getUrlParam('id');
+      if (!petId) {
+        window.location.href = 'settings.html';
+        return;
+      }
 
-        // Set back button to return to pet view
-        document.getElementById('back-button').href = `pet-view.html?id=${currentPetId}`;
+      petData = await getPetFromFirestore(petId);
+      if (!petData) {
+        window.location.href = 'settings.html';
+        return;
+      }
 
-        // Update header
-        const config = PET_CONFIG[pet.type] || PET_CONFIG.dog;
-        document.getElementById('edit-header').style.background =
-          `linear-gradient(135deg, ${config.color} 0%, ${lightenColor(config.color)} 100%)`;
-        document.getElementById('pet-avatar').textContent = config.emoji;
-        document.getElementById('pet-type-display').textContent = config.name;
+      // Update header
+      const config = PET_CONFIG[petData.type] || PET_CONFIG.dog;
+      document.getElementById('pet-name-display').textContent = petData.name;
+      document.getElementById('pet-type-display').textContent = config.name;
+      document.getElementById('pet-icon').textContent = config.emoji;
 
-        // Fill in form fields
-        document.getElementById('pet-name').value = pet.name;
-        document.getElementById('pet-breed').value = pet.breed || '';
+      // Fill form
+      document.getElementById('pet-name').value = petData.name;
 
-        // Load tasks - now all tasks are in customTasks
-        tasks = pet.customTasks || [];
+      // Load tasks
+      tasks = petData.customTasks || [];
+      renderTasks();
 
-        renderTasksList();
-        renderTaskOrderList();
+      // Auto-save name on blur
+      document.getElementById('pet-name').addEventListener('blur', saveName);
 
-        // Enable save button now that pet is loaded
-        const submitBtn = document.querySelector('.submit-button');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Done</span><span class="button-icon">←</span>';
-      } catch (error) {
-        console.error('Error loading pet:', error);
-        alert('Error loading pet: ' + error.message);
+      // Setup day buttons
+      document.querySelectorAll('.day-btn').forEach(btn => {
+        btn.onclick = () => btn.classList.toggle('active');
+      });
+    }
+
+    async function saveName() {
+      const name = document.getElementById('pet-name').value.trim();
+      if (name && name !== petData.name) {
+        await updatePetInFirestore(petId, { name });
+        petData.name = name;
+        document.getElementById('pet-name-display').textContent = name;
       }
     }
 
-    // ============================================
-    // TASK FORM POPUP
-    // ============================================
+    function renderTasks() {
+      const container = document.getElementById('task-list');
 
-    function openTaskForm(icon, type, placeholder) {
-      editingTaskId = null; // New task, not editing
-      currentFormIcon = icon;
-      currentFormType = type;
+      if (tasks.length === 0) {
+        container.innerHTML = '<div class="empty-tasks">No tasks yet. Tap a button above to add one.</div>';
+        return;
+      }
 
-      document.getElementById('task-form-icon').textContent = icon;
-      document.getElementById('task-form-type').textContent = type;
-      document.getElementById('task-form-name').placeholder = type;
-      document.getElementById('task-form-name').value = '';
-      document.getElementById('task-form-details').placeholder = placeholder;
-      document.getElementById('task-form-details').value = '';
-      const addBtn = document.querySelector('.task-form-add');
-      addBtn.textContent = 'Add Task';
-      addBtn.disabled = false;
+      let html = '';
+      tasks.forEach(task => {
+        const scheduleText = task.schedule === 'weekly' && task.days?.length
+          ? task.days.map(d => ['Su','Mo','Tu','We','Th','Fr','Sa'][d]).join(', ')
+          : 'Daily';
 
-      // Reset schedule to daily
+        html += `
+          <div class="task-item">
+            <span class="task-item-icon">${task.icon}</span>
+            <div class="task-item-info">
+              <div class="task-item-name">${escapeHtml(task.name)}</div>
+              <div class="task-item-detail">${scheduleText}${task.details ? ' • ' + escapeHtml(task.details) : ''}</div>
+            </div>
+            <div class="task-item-btns">
+              <button class="task-btn task-btn-edit" onclick="editTask('${task.id}')">✎</button>
+              <button class="task-btn task-btn-delete" onclick="deleteTask('${task.id}')">×</button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function openTaskModal(icon, name) {
+      currentIcon = icon;
+      document.getElementById('modal-icon').textContent = icon;
+      document.getElementById('modal-title').textContent = 'Add ' + name;
+      document.getElementById('task-name').value = '';
+      document.getElementById('task-details').value = '';
+      document.getElementById('editing-task-id').value = '';
       setSchedule('daily');
-      document.querySelectorAll('input[name="days"]').forEach(cb => cb.checked = false);
-      document.getElementById('task-requires-approval').checked = false;
-      document.getElementById('task-form-time').value = '';
-
-      document.getElementById('task-form-popup').style.display = 'block';
-      document.getElementById('task-form-name').focus();
+      document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('task-modal').style.display = 'flex';
     }
 
     function editTask(taskId) {
       const task = tasks.find(t => t.id === taskId);
       if (!task) return;
 
-      editingTaskId = taskId;
-      currentFormIcon = task.icon;
-      currentFormType = task.name;
+      currentIcon = task.icon;
+      document.getElementById('modal-icon').textContent = task.icon;
+      document.getElementById('modal-title').textContent = 'Edit Task';
+      document.getElementById('task-name').value = task.name;
+      document.getElementById('task-details').value = task.details || '';
+      document.getElementById('editing-task-id').value = taskId;
 
-      document.getElementById('task-form-icon').textContent = task.icon;
-      document.getElementById('task-form-type').textContent = 'Edit Task';
-      document.getElementById('task-form-name').placeholder = 'Task name';
-      document.getElementById('task-form-name').value = task.name;
-      document.getElementById('task-form-details').placeholder = 'Details';
-      document.getElementById('task-form-details').value = task.details || '';
-      const addBtn = document.querySelector('.task-form-add');
-      addBtn.textContent = 'Save Changes';
-      addBtn.disabled = false;
-
-      // Set schedule
-      setSchedule(task.schedule === 'weekly' ? 'weekly' : 'daily');
-
-      // Set days
-      document.querySelectorAll('input[name="days"]').forEach(cb => {
-        cb.checked = task.days && task.days.includes(parseInt(cb.value));
+      setSchedule(task.schedule || 'daily');
+      document.querySelectorAll('.day-btn').forEach(btn => {
+        const day = parseInt(btn.dataset.day);
+        btn.classList.toggle('active', task.days?.includes(day));
       });
 
-      // Set approval toggle
-      document.getElementById('task-requires-approval').checked = task.requiresApproval || false;
-
-      // Set time
-      document.getElementById('task-form-time').value = task.reminderTime || '';
-
-      document.getElementById('task-form-popup').style.display = 'block';
-      document.getElementById('task-form-name').focus();
+      document.getElementById('task-modal').style.display = 'flex';
     }
 
-    function closeTaskForm() {
-      document.getElementById('task-form-popup').style.display = 'none';
-      editingTaskId = null;
+    function closeTaskModal() {
+      document.getElementById('task-modal').style.display = 'none';
     }
 
-    function setSchedule(value) {
-      document.getElementById('schedule-value').value = value;
-      document.querySelectorAll('.schedule-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.value === value);
-      });
-      document.getElementById('day-picker').classList.toggle('visible', value === 'weekly');
+    function setSchedule(type) {
+      currentSchedule = type;
+      document.getElementById('schedule-daily').classList.toggle('active', type === 'daily');
+      document.getElementById('schedule-weekly').classList.toggle('active', type === 'weekly');
+      document.getElementById('days-row').style.display = type === 'weekly' ? 'flex' : 'none';
     }
 
-    function toggleDayPicker() {
-      const isWeekly = document.getElementById('schedule-value').value === 'weekly';
-      document.getElementById('day-picker').classList.toggle('visible', isWeekly);
-    }
-
-    async function submitTaskForm() {
-      const nameInput = document.getElementById('task-form-name');
-      const detailsInput = document.getElementById('task-form-details');
-      const addBtn = document.querySelector('.task-form-add');
-
-      const name = nameInput.value.trim() || currentFormType;
-      const details = detailsInput.value.trim() || 'Tap when done!';
-
-      // Get schedule
-      const schedule = document.getElementById('schedule-value').value;
-      const dayCheckboxes = document.querySelectorAll('input[name="days"]:checked');
-      const days = Array.from(dayCheckboxes).map(cb => parseInt(cb.value));
-      const requiresApproval = document.getElementById('task-requires-approval').checked;
-      const reminderTime = document.getElementById('task-form-time').value || '';
-
-      if (editingTaskId) {
-        // Update existing task
-        const task = tasks.find(t => t.id === editingTaskId);
-        if (task) {
-          task.name = name;
-          task.details = details;
-          task.schedule = schedule;
-          task.days = schedule === 'weekly' ? days : [];
-          task.requiresApproval = requiresApproval;
-          task.reminderTime = reminderTime;
-        }
-      } else {
-        // Create new task
-        const id = 'task_' + Date.now();
-        tasks.push({
-          id,
-          icon: currentFormIcon,
-          name,
-          details,
-          schedule,
-          days: schedule === 'weekly' ? days : [],
-          requiresApproval,
-          reminderTime
-        });
-      }
-
-      // Auto-save to Firestore
-      addBtn.textContent = 'Saving...';
-      addBtn.disabled = true;
-      try {
-        const taskIds = tasks.map(t => t.id);
-        await updatePetInFirestore(currentPetId, {
-          tasks: taskIds,
-          customTasks: tasks
-        });
-        renderTasksList();
-        renderTaskOrderList();
-        closeTaskForm();
-      } catch (error) {
-        alert('Error saving: ' + error.message);
-        addBtn.textContent = editingTaskId ? 'Save Changes' : 'Add Task';
-        addBtn.disabled = false;
-      }
-    }
-
-    // ============================================
-    // TASKS LIST
-    // ============================================
-
-    const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-    function formatTime(time24) {
-      if (!time24) return '';
-      const [hours, minutes] = time24.split(':').map(Number);
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const hours12 = hours % 12 || 12;
-      return `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-    }
-
-    function getScheduleLabel(task) {
-      if (!task.schedule || task.schedule === 'daily') {
-        return 'Daily';
-      }
-      if (task.days && task.days.length > 0) {
-        return task.days.map(d => DAY_NAMES[d]).join(', ');
-      }
-      return 'No days selected';
-    }
-
-    function renderTasksList() {
-      const container = document.getElementById('tasks-list');
-
-      if (tasks.length === 0) {
-        container.innerHTML = '<p class="empty-tasks">No tasks yet. Tap a task type above to add one.</p>';
+    async function saveTask() {
+      const name = document.getElementById('task-name').value.trim();
+      if (!name) {
+        alert('Please enter a task name');
         return;
       }
 
-      let html = '';
-      tasks.forEach((task, index) => {
-        const scheduleLabel = getScheduleLabel(task);
-        const approvalBadge = task.requiresApproval ? '<span class="approval-badge">Needs OK</span>' : '';
-        const timeLabel = task.reminderTime ? `⏰ ${formatTime(task.reminderTime)}` : '';
-        html += `
-          <div class="task-list-item">
-            <span class="task-list-icon">${task.icon}</span>
-            <div class="task-list-info" onclick="editTask('${task.id}')">
-              <div class="task-list-name">${escapeHtml(task.name)}${approvalBadge}</div>
-              <div class="task-list-details">${escapeHtml(task.details || 'Tap when done!')}</div>
-              <div class="task-list-schedule">📅 ${scheduleLabel}${timeLabel ? ' • ' + timeLabel : ''}</div>
-            </div>
-            <button type="button" class="task-edit-btn" onclick="editTask('${task.id}')">✎</button>
-            <button type="button" class="task-delete-btn" onclick="deleteTask('${task.id}')">×</button>
-          </div>
-        `;
+      const details = document.getElementById('task-details').value.trim();
+      const editingId = document.getElementById('editing-task-id').value;
+      const days = Array.from(document.querySelectorAll('.day-btn.active')).map(b => parseInt(b.dataset.day));
+
+      if (editingId) {
+        // Update existing
+        const task = tasks.find(t => t.id === editingId);
+        if (task) {
+          task.name = name;
+          task.details = details;
+          task.schedule = currentSchedule;
+          task.days = currentSchedule === 'weekly' ? days : [];
+        }
+      } else {
+        // Add new
+        tasks.push({
+          id: 'task_' + Date.now(),
+          icon: currentIcon,
+          name,
+          details,
+          schedule: currentSchedule,
+          days: currentSchedule === 'weekly' ? days : []
+        });
+      }
+
+      // Save to Firestore
+      await updatePetInFirestore(petId, {
+        tasks: tasks.map(t => t.id),
+        customTasks: tasks
       });
 
-      container.innerHTML = html;
+      closeTaskModal();
+      renderTasks();
     }
 
     async function deleteTask(taskId) {
       if (!confirm('Delete this task?')) return;
 
       tasks = tasks.filter(t => t.id !== taskId);
-      renderTasksList();
-      renderTaskOrderList();
-
-      // Auto-save
-      try {
-        const taskIds = tasks.map(t => t.id);
-        await updatePetInFirestore(currentPetId, {
-          tasks: taskIds,
-          customTasks: tasks
-        });
-      } catch (error) {
-        alert('Error saving: ' + error.message);
-      }
-    }
-
-    // ============================================
-    // TASK REORDERING
-    // ============================================
-
-    function renderTaskOrderList() {
-      const container = document.getElementById('task-order-list');
-      const section = document.getElementById('task-order-section');
-
-      if (tasks.length < 2) {
-        section.style.display = 'none';
-        return;
-      }
-
-      section.style.display = 'block';
-      section.classList.add('open');
-
-      let html = '';
-      tasks.forEach((task, index) => {
-        html += `
-          <div class="task-order-item">
-            <span class="task-order-icon">${task.icon}</span>
-            <span class="task-order-name">${escapeHtml(task.name)}</span>
-            <div class="task-order-buttons">
-              <button type="button" class="order-btn" onclick="moveTask(${index}, -1)" ${index === 0 ? 'disabled' : ''}>▲</button>
-              <button type="button" class="order-btn" onclick="moveTask(${index}, 1)" ${index === tasks.length - 1 ? 'disabled' : ''}>▼</button>
-            </div>
-          </div>
-        `;
+      await updatePetInFirestore(petId, {
+        tasks: tasks.map(t => t.id),
+        customTasks: tasks
       });
-
-      container.innerHTML = html;
+      renderTasks();
     }
 
-    async function moveTask(index, direction) {
-      const newIndex = index + direction;
-      if (newIndex < 0 || newIndex >= tasks.length) return;
+    async function deletePet() {
+      if (!confirm('Delete this pet and all their tasks? This cannot be undone.')) return;
 
-      // Swap
-      [tasks[index], tasks[newIndex]] = [tasks[newIndex], tasks[index]];
-      renderTasksList();
-      renderTaskOrderList();
-
-      // Auto-save
-      try {
-        const taskIds = tasks.map(t => t.id);
-        await updatePetInFirestore(currentPetId, {
-          tasks: taskIds,
-          customTasks: tasks
-        });
-      } catch (error) {
-        alert('Error saving: ' + error.message);
-      }
+      await deletePetFromFirestore(petId);
+      window.location.href = 'settings.html';
     }
 
-    // ============================================
-    // FORM SUBMISSION
-    // ============================================
-
-    async function confirmDelete() {
-      if (confirm('Are you sure you want to remove this pet? This cannot be undone.')) {
-        await deletePetFromFirestore(currentPetId);
-        window.location.href = 'today.html';
-      }
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
-
-    // Auto-save name and breed on blur
-    document.getElementById('pet-name').addEventListener('blur', autoSaveBasicInfo);
-    document.getElementById('pet-breed').addEventListener('blur', autoSaveBasicInfo);
-
-    async function autoSaveBasicInfo() {
-      const name = document.getElementById('pet-name').value.trim();
-      const breed = document.getElementById('pet-breed').value.trim();
-      if (!name) return; // Don't save empty name
-
-      try {
-        await updatePetInFirestore(currentPetId, { name, breed });
-      } catch (error) {
-        console.error('Error auto-saving:', error);
-      }
-    }
-
-    // Done button - just navigate back (everything auto-saves)
-    document.getElementById('edit-pet-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      window.location.href = `pet-view.html?id=${currentPetId}`;
-    });
   </script>
 </body>
 </html>
