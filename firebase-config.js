@@ -248,7 +248,8 @@ async function addPetToFirestore(petData) {
 
 async function updatePetInFirestore(petId, updates) {
   const family = getCurrentFamily();
-  if (!family) throw new Error('Not logged in');
+  if (!family || !family.id) throw new Error('Not logged in');
+  if (!petId) throw new Error('Pet ID is required');
 
   await db.collection('families')
     .doc(family.id)
@@ -262,7 +263,8 @@ async function updatePetInFirestore(petId, updates) {
 
 async function deletePetFromFirestore(petId) {
   const family = getCurrentFamily();
-  if (!family) throw new Error('Not logged in');
+  if (!family || !family.id) throw new Error('Not logged in');
+  if (!petId) throw new Error('Pet ID is required');
 
   // Delete pet document
   await db.collection('families')
@@ -318,7 +320,8 @@ async function getTaskCompletionsFromFirestore() {
 
 async function isTaskCompleteInFirestore(petId, taskId) {
   const family = getCurrentFamily();
-  if (!family) return false;
+  if (!family || !family.id) return false;
+  if (!petId || !taskId) return false;
 
   const today = getTodayKey();
   const docId = `${today}_${petId}_${taskId}`;
@@ -334,7 +337,8 @@ async function isTaskCompleteInFirestore(petId, taskId) {
 
 async function getTaskCompletionDetails(petId, taskId) {
   const family = getCurrentFamily();
-  if (!family) return null;
+  if (!family || !family.id) return null;
+  if (!petId || !taskId) return null;
 
   const today = getTodayKey();
   const docId = `${today}_${petId}_${taskId}`;
@@ -352,7 +356,8 @@ async function getTaskCompletionDetails(petId, taskId) {
 
 async function toggleTaskInFirestore(petId, taskId, requiresApproval = false) {
   const family = getCurrentFamily();
-  if (!family) throw new Error('Not logged in');
+  if (!family || !family.id) throw new Error('Not logged in');
+  if (!petId || !taskId) throw new Error('Pet ID and Task ID are required');
 
   const member = getCurrentMember();
   const isParent = member ? member.isParent : false;

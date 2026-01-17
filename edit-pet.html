@@ -227,7 +227,7 @@
 
     async function initAsync() {
       currentPetId = getUrlParam('id');
-      if (!currentPetId) {
+      if (!currentPetId || currentPetId.trim() === '') {
         window.location.href = 'index.html';
         return;
       }

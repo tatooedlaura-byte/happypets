@@ -95,7 +95,7 @@
       const family = getCurrentFamily();
       console.log('Current family:', family);
 
-      if (!currentPetId) {
+      if (!currentPetId || currentPetId.trim() === '') {
         alert('No pet ID in URL');
         window.location.href = 'index.html';
         return;
