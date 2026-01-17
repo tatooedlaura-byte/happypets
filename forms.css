@@ -1125,7 +1125,7 @@
 }
 
 /* Toggle Switch */
-.toggle-label {
+.form-group .toggle-label {
   display: flex;
   align-items: center;
   gap: 12px;
