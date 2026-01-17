@@ -538,32 +538,70 @@
     let currentSchedule = 'daily';
 
     async function init() {
-      petId = getUrlParam('id');
-      if (!petId) {
-        window.location.href = 'settings.html';
-        return;
+      try {
+        petId = getUrlParam('id');
+        console.log('Pet ID from URL:', petId);
+
+        if (!petId) {
+          console.log('No pet ID, redirecting to settings');
+          window.location.href = 'settings.html';
+          return;
+        }
+
+        petData = await getPetFromFirestore(petId);
+        console.log('Pet data loaded:', petData);
+
+        if (!petData) {
+          alert('Could not find this pet. It may have been deleted.');
+          window.location.href = 'settings.html';
+          return;
+        }
+
+        // Update header
+        const config = PET_CONFIG[petData.type] || PET_CONFIG.dog;
+        document.getElementById('pet-name-display').textContent = petData.name;
+        document.getElementById('pet-type-display').textContent = config.name;
+        document.getElementById('pet-icon').textContent = config.emoji;
+
+        // Load tasks - handle both new and legacy formats
+        tasks = petData.customTasks || [];
+
+        // Convert legacy tasks to new format if needed
+        if (tasks.length === 0 && petData.tasks && petData.tasks.length > 0) {
+          console.log('Converting legacy tasks:', petData.tasks);
+          petData.tasks.forEach(taskId => {
+            const legacyTask = TASK_CONFIG[taskId];
+            if (legacyTask) {
+              tasks.push({
+                id: taskId,
+                icon: legacyTask.icon,
+                name: legacyTask.name,
+                details: legacyTask.time || '',
+                schedule: 'daily',
+                days: []
+              });
+            }
+          });
+          // Save converted tasks to Firestore
+          if (tasks.length > 0) {
+            await updatePetInFirestore(petId, {
+              tasks: tasks.map(t => t.id),
+              customTasks: tasks
+            });
+            console.log('Saved converted tasks');
+          }
+        }
+
+        renderTasks();
+
+        // Setup day buttons
+        document.querySelectorAll('.day-btn').forEach(btn => {
+          btn.onclick = () => btn.classList.toggle('active');
+        });
+      } catch (error) {
+        console.error('Error loading pet:', error);
+        alert('Error loading pet: ' + error.message);
       }
-
-      petData = await getPetFromFirestore(petId);
-      if (!petData) {
-        window.location.href = 'settings.html';
-        return;
-      }
-
-      // Update header
-      const config = PET_CONFIG[petData.type] || PET_CONFIG.dog;
-      document.getElementById('pet-name-display').textContent = petData.name;
-      document.getElementById('pet-type-display').textContent = config.name;
-      document.getElementById('pet-icon').textContent = config.emoji;
-
-      // Load tasks
-      tasks = petData.customTasks || [];
-      renderTasks();
-
-      // Setup day buttons
-      document.querySelectorAll('.day-btn').forEach(btn => {
-        btn.onclick = () => btn.classList.toggle('active');
-      });
     }
 
     function showNameEdit() {
