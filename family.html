@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="stylesheet" href="styles.css?v=7">
-  <link rel="stylesheet" href="forms.css?v=5">
+  <link rel="stylesheet" href="forms.css?v=8">
 </head>
 <body>
   <div class="app">
@@ -22,17 +22,15 @@
     <!-- Current Member Selection -->
     <section class="member-selection" id="member-selection">
       <h2>Who's using the app?</h2>
-      <div class="member-grid" id="member-grid">
-        <!-- Members rendered here -->
+      <div class="member-dropdown-wrapper">
+        <div class="dropdown-row">
+          <select id="member-dropdown" class="member-dropdown" onchange="handleMemberSelect(this.value)">
+            <option value="">Select your name...</option>
+            <!-- Members rendered here -->
+          </select>
+          <button type="button" id="edit-member-btn" class="edit-member-btn" onclick="editSelectedMember()" style="display: none;">✎</button>
+        </div>
       </div>
-    </section>
-
-    <!-- Add Member Section -->
-    <section class="add-member-section">
-      <button type="button" class="add-member-btn" onclick="openAddMemberForm()">
-        <span class="add-icon">+</span>
-        <span>Add Family Member</span>
-      </button>
     </section>
 
     <!-- Member Stats Section -->
@@ -244,37 +242,59 @@
       statsGrid.innerHTML = html;
     }
 
+    let membersData = []; // Store members for lookup
+
     async function renderMembers() {
-      const members = await getMembers();
-      const grid = document.getElementById('member-grid');
+      membersData = await getMembers();
+      const dropdown = document.getElementById('member-dropdown');
+      const editBtn = document.getElementById('edit-member-btn');
       const currentMember = getCurrentMember();
 
-      if (members.length === 0) {
-        grid.innerHTML = '<p class="no-members">Add family members to get started!</p>';
+      let html = '<option value="">Select your name...</option>';
+
+      membersData.forEach(member => {
+        const isSelected = currentMember && currentMember.id === member.id;
+        const parentLabel = member.isParent ? ' (Parent)' : '';
+        html += `<option value="${member.id}" ${isSelected ? 'selected' : ''}>${member.avatar} ${escapeHtml(member.name)}${parentLabel}</option>`;
+      });
+
+      // Add "Add new member" option
+      html += '<option value="__add_new__">➕ Add new member...</option>';
+
+      dropdown.innerHTML = html;
+
+      // Show edit button if a member is selected
+      editBtn.style.display = currentMember ? 'flex' : 'none';
+    }
+
+    function editSelectedMember() {
+      const dropdown = document.getElementById('member-dropdown');
+      const memberId = dropdown.value;
+      if (!memberId || memberId === '__add_new__') return;
+
+      const member = membersData.find(m => m.id === memberId);
+      if (member) {
+        editMember(member.id, member.name, member.avatar, member.color, member.isParent || false);
+      }
+    }
+
+    function handleMemberSelect(value) {
+      if (value === '__add_new__') {
+        openAddMemberForm();
+        // Reset dropdown to previous selection
+        const currentMember = getCurrentMember();
+        document.getElementById('member-dropdown').value = currentMember ? currentMember.id : '';
         return;
       }
 
-      let html = '';
-      members.forEach(member => {
-        const isSelected = currentMember && currentMember.id === member.id;
-        const parentBadge = member.isParent ? '<span class="parent-badge">Parent</span>' : '';
-        html += `
-          <div class="member-card ${isSelected ? 'selected' : ''}" onclick="selectMember('${member.id}', '${member.name}', '${member.avatar}', ${member.isParent || false})">
-            <div class="member-avatar" style="background: ${member.color}">${member.avatar}</div>
-            <div class="member-name">${escapeHtml(member.name)}${parentBadge}</div>
-            ${isSelected ? '<div class="member-check">✓</div>' : ''}
-            <button class="member-edit-btn" onclick="event.stopPropagation(); editMember('${member.id}', '${escapeHtml(member.name)}', '${member.avatar}', '${member.color}', ${member.isParent || false})">✎</button>
-          </div>
-        `;
-      });
+      if (!value) return;
 
-      grid.innerHTML = html;
-    }
-
-    function selectMember(memberId, memberName, memberAvatar, isParent) {
-      setCurrentMember(memberId, memberName, memberAvatar, isParent);
-      // Go to Today page after selecting who you are
-      window.location.href = 'today.html';
+      const member = membersData.find(m => m.id === value);
+      if (member) {
+        setCurrentMember(member.id, member.name, member.avatar, member.isParent || false);
+        // Go to Today page after selecting who you are
+        window.location.href = 'today.html';
+      }
     }
 
     function openAddMemberForm() {
