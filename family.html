@@ -9,29 +9,24 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="stylesheet" href="styles.css?v=7">
-  <link rel="stylesheet" href="forms.css?v=8">
+  <link rel="stylesheet" href="forms.css?v=9">
 </head>
 <body>
   <div class="app">
-    <!-- Header -->
-    <header class="header">
+    <!-- Header with Member Selection -->
+    <header class="header family-header">
       <h1>👨‍👩‍👧 Family</h1>
       <p class="subtitle" id="family-name">Loading...</p>
-    </header>
-
-    <!-- Current Member Selection -->
-    <section class="member-selection" id="member-selection">
-      <h2>Who's using the app?</h2>
-      <div class="member-dropdown-wrapper">
+      <div class="header-dropdown-wrapper">
         <div class="dropdown-row">
-          <select id="member-dropdown" class="member-dropdown" onchange="handleMemberSelect(this.value)">
+          <select id="member-dropdown" class="member-dropdown header-dropdown" onchange="handleMemberSelect(this.value)">
             <option value="">Select your name...</option>
             <!-- Members rendered here -->
           </select>
           <button type="button" id="edit-member-btn" class="edit-member-btn" onclick="editSelectedMember()" style="display: none;">✎</button>
         </div>
       </div>
-    </section>
+    </header>
 
     <!-- Member Stats Section -->
     <section class="stats-section" id="stats-section">
