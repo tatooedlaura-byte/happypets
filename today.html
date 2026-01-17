@@ -138,10 +138,12 @@
 
             petHasTasks = true;
             totalTasks++;
-            const isComplete = await isTaskCompleteInFirestore(pet.id, taskId);
+            const completion = await getTaskCompletionDetails(pet.id, taskId);
+            const isComplete = !!completion;
             if (isComplete) completedTasks++;
 
             const hintText = (pet.taskHints && pet.taskHints[taskId]) || legacyTask.time;
+            const doneText = isComplete ? `Done by ${completion.completedByName || 'someone'} ✨` : escapeHtml(hintText);
 
             petTasksHtml += `
               <button class="task-button ${isComplete ? 'completed' : ''}"
@@ -151,7 +153,7 @@
                 <div class="task-icon">${legacyTask.icon}</div>
                 <div class="task-content">
                   <div class="task-name">${escapeHtml(legacyTask.name)}</div>
-                  <div class="task-time">${isComplete ? 'Done! ✨' : escapeHtml(hintText)}</div>
+                  <div class="task-time">${doneText}</div>
                 </div>
                 <div class="task-check">${isComplete ? '✓' : ''}</div>
               </button>
@@ -164,7 +166,8 @@
 
           petHasTasks = true;
           totalTasks++;
-          const isComplete = await isTaskCompleteInFirestore(pet.id, taskId);
+          const completion = await getTaskCompletionDetails(pet.id, taskId);
+          const isComplete = !!completion;
           if (isComplete) completedTasks++;
 
           const hint = taskData.details || 'Tap when done!';
@@ -176,7 +179,7 @@
           let statusClass = isComplete ? 'completed' : (overdue ? 'overdue' : '');
 
           if (isComplete) {
-            statusText = 'Done! ✨';
+            statusText = `Done by ${completion.completedByName || 'someone'} ✨`;
           } else if (overdue) {
             statusText = `⚠️ Overdue! Was due at ${timeDisplay}`;
           } else if (timeDisplay) {
