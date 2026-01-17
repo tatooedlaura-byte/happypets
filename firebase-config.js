@@ -69,7 +69,7 @@ function isCurrentMemberParent() {
 
 function requireAuth() {
   const family = getCurrentFamily();
-  if (!family) {
+  if (!family || !family.id) {
     window.location.href = 'login.html';
     return false;
   }
@@ -140,7 +140,7 @@ function logout() {
 
 async function getMembers() {
   const family = getCurrentFamily();
-  if (!family) return [];
+  if (!family || !family.id) return [];
 
   const snapshot = await db.collection('families')
     .doc(family.id)
@@ -155,7 +155,7 @@ async function getMembers() {
 
 async function addMember(name, avatar, color, isParent = false) {
   const family = getCurrentFamily();
-  if (!family) throw new Error('Not logged in');
+  if (!family || !family.id) throw new Error('Not logged in');
 
   const memberRef = await db.collection('families')
     .doc(family.id)
@@ -173,7 +173,7 @@ async function addMember(name, avatar, color, isParent = false) {
 
 async function updateMember(memberId, updates) {
   const family = getCurrentFamily();
-  if (!family) throw new Error('Not logged in');
+  if (!family || !family.id) throw new Error('Not logged in');
 
   await db.collection('families')
     .doc(family.id)
@@ -184,7 +184,7 @@ async function updateMember(memberId, updates) {
 
 async function deleteMember(memberId) {
   const family = getCurrentFamily();
-  if (!family) throw new Error('Not logged in');
+  if (!family || !family.id) throw new Error('Not logged in');
 
   await db.collection('families')
     .doc(family.id)
@@ -199,7 +199,7 @@ async function deleteMember(memberId) {
 
 async function getPetsFromFirestore() {
   const family = getCurrentFamily();
-  if (!family) return [];
+  if (!family || !family.id) return [];
 
   const snapshot = await db.collection('families')
     .doc(family.id)
@@ -230,7 +230,7 @@ async function getPetFromFirestore(petId) {
 
 async function addPetToFirestore(petData) {
   const family = getCurrentFamily();
-  if (!family) throw new Error('Not logged in');
+  if (!family || !family.id) throw new Error('Not logged in');
 
   const petRef = await db.collection('families')
     .doc(family.id)
@@ -296,7 +296,7 @@ function getTodayKey() {
 
 async function getTaskCompletionsFromFirestore() {
   const family = getCurrentFamily();
-  if (!family) return {};
+  if (!family || !family.id) return {};
 
   const today = getTodayKey();
 
@@ -415,7 +415,7 @@ async function toggleTaskInFirestore(petId, taskId, requiresApproval = false) {
 
 async function getPendingApprovals() {
   const family = getCurrentFamily();
-  if (!family) return [];
+  if (!family || !family.id) return [];
 
   const today = getTodayKey();
 
@@ -434,7 +434,7 @@ async function getPendingApprovals() {
 
 async function approveTask(completionId) {
   const family = getCurrentFamily();
-  if (!family) throw new Error('Not logged in');
+  if (!family || !family.id) throw new Error('Not logged in');
 
   const member = getCurrentMember();
   if (!member || !member.isParent) throw new Error('Only parents can approve tasks');
@@ -462,7 +462,7 @@ async function approveTask(completionId) {
 
 async function rejectTask(completionId) {
   const family = getCurrentFamily();
-  if (!family) throw new Error('Not logged in');
+  if (!family || !family.id) throw new Error('Not logged in');
 
   const member = getCurrentMember();
   if (!member || !member.isParent) throw new Error('Only parents can reject tasks');
@@ -476,7 +476,7 @@ async function rejectTask(completionId) {
 
 async function getCompletedTasksForPetFromFirestore(petId) {
   const family = getCurrentFamily();
-  if (!family) return 0;
+  if (!family || !family.id) return 0;
 
   const today = getTodayKey();
 
@@ -496,7 +496,7 @@ async function getCompletedTasksForPetFromFirestore(petId) {
 
 async function getKindnessFromFirestore() {
   const family = getCurrentFamily();
-  if (!family) return { total: 0, byMember: {} };
+  if (!family || !family.id) return { total: 0, byMember: {} };
 
   const doc = await db.collection('families')
     .doc(family.id)
@@ -513,7 +513,7 @@ async function getKindnessFromFirestore() {
 
 async function addKindnessToFirestore(memberId) {
   const family = getCurrentFamily();
-  if (!family) return;
+  if (!family || !family.id) return;
 
   const docRef = db.collection('families')
     .doc(family.id)
@@ -547,7 +547,7 @@ function getKindnessLevel(kindnessData) {
 
 async function getMemberStats() {
   const family = getCurrentFamily();
-  if (!family) return {};
+  if (!family || !family.id) return {};
 
   const today = getTodayKey();
   const weekAgo = new Date();
